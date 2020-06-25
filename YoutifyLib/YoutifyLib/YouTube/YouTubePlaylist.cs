@@ -9,6 +9,11 @@ namespace YoutifyLib.YouTube
     /// </summary>
     public class YouTubePlaylist : Playlist
     {
+        public YouTubePlaylist(string title, string description, string id) : base(title, description)
+        {
+            ID = id;
+        }
+
         // ID of YouTube Playlist
         public string ID { get; set; }
     }

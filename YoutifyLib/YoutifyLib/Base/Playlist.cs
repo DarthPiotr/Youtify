@@ -6,6 +6,17 @@ namespace YoutifyLib
 {
     public class Playlist
     {   
+        public Playlist(string title, string description)
+        {
+            Title = title;
+            Description = description;
+        }
+
+        /// <summary>
+        /// The title of the playlist
+        /// </summary>
+        public string Title { get; protected set; }
+
         /// <summary>
         /// List of songs on that playlist
         /// </summary>
@@ -14,6 +25,6 @@ namespace YoutifyLib
         /// <summary>
         /// Description of a playlist
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; protected set; }
     }
 }

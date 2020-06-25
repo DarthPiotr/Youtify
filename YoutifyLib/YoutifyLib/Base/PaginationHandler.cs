@@ -14,7 +14,7 @@ namespace YoutifyLib
         /// <summary>
         /// Returns list contained on the current page
         /// </summary>
-        public IList CurrentList { get; protected set; }
+        public List<Playlist> CurrentList { get; protected set; }
 
         /// <summary>
         /// Sets CurrentList to first page of results

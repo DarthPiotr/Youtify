@@ -39,6 +39,7 @@ namespace YoutifyLib.YouTube
 
         public override bool FirstPage()
         {
+            Utils.LogInfo("Requested first page");
             var request = Task.Run(() => GetPlaylistPageAsync(null));
             request.Wait();
 
@@ -51,6 +52,10 @@ namespace YoutifyLib.YouTube
 
         public override bool NextPage()
         {
+            if (NextPageToken == null)
+                return false;
+
+            Utils.LogInfo("Requested next page");
             var request = Task.Run(() => GetPlaylistPageAsync(NextPageToken));
             request.Wait();
 
@@ -63,6 +68,10 @@ namespace YoutifyLib.YouTube
 
         public override bool PrevPage()
         {
+            if (PrevPageToken == null)
+                return false;
+
+            Utils.LogInfo("Requested previous page");
             var request = Task.Run(() => GetPlaylistPageAsync(PrevPageToken));
             request.Wait();
 
@@ -102,7 +111,7 @@ namespace YoutifyLib.YouTube
         }
 
         /// <summary>
-        /// Porcesses the result of API
+        /// Processes the result of API
         /// </summary>
         /// <param name="response">API response</param>
         private void EvalResult (PlaylistListResponse response) {
@@ -111,16 +120,10 @@ namespace YoutifyLib.YouTube
                 NextPageToken = response.NextPageToken;
                 PrevPageToken = response.PrevPageToken;
 
-                List<YouTubePlaylist> YTlist = new List<YouTubePlaylist>();
+                List<Playlist> YTlist = new List<Playlist>();
                 foreach (var elem in response.Items)
-                {
-                    YTlist.Add(
-                        new YouTubePlaylist
-                        {
-                            ID = elem.Id
-                        }
-                    );
-                }
+                    YTlist.Add(new YouTubePlaylist(elem.Snippet.Title, elem.Snippet.Description, elem.Id));
+
                 CurrentList = YTlist;
             }
         }
