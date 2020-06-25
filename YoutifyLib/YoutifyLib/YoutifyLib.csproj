@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>DarthPiotr</Authors>
+    <Company />
+    <PackageProjectUrl>https://github.com/DarthPiotr/Youtify</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DarthPiotr/Youtify</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.46.0.1995" />
+  </ItemGroup>
+
+</Project>
