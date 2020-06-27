@@ -27,6 +27,10 @@ namespace YoutifyLib.YouTube
         private string NextPageToken { set; get; }
 
         private PlaylistSearchArguments Arguments { set; get; } = null;
+        /// <summary>
+        /// stores ChannelID if it was already resolved.
+        /// </summary>
+        private string channelId;
 
         /// <summary>
         /// Specifies how many results will be shown per page
@@ -42,7 +46,62 @@ namespace YoutifyLib.YouTube
             PrevPageToken = null;
             NextPageToken = null;
         }
+       
+        /// <summary>
+        /// Returns id of a channel, without UC prefix.
+        /// </summary>
+        /// <param name="channelName">A channel name to resolve.
+        /// Leave empty or null to resolve current channel (OAuth)</param>
+        /// <returns>Id of a channel, without UC prefix</returns>
+        public string GetId(string channelName = null)
+        {
+            if (channelId   != null &&
+                channelName == null )
+                return channelId;
 
+            // FLaFUy4CSusl-0SBefzAS6LA
+
+            var request = Task.Run(() =>
+            {
+                try
+                {
+                    var req = Service.Channels.List("id");
+                    if (channelName == null)
+                        req.Mine = true;
+                    else
+                        req.ForUsername = channelName;
+
+                    var res = req.ExecuteAsync();
+                    return res;
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError(e.Message);
+                    return null;
+                }
+            });
+            request.Wait();
+
+            var result = request.Result;
+            if (channelId != null &&
+                channelName == null)
+                channelId = result.Items[0].Id.Substring(2);
+            return result.Items[0].Id.Substring(2);
+        }
+       
+        /// <summary>
+        /// Search for the playlist(s) with specified arguments.
+        /// </summary>
+        /// <param name="arg">Arguments to search with</param>
+        /// <returns>If operation was successfull (Can be true if nothing was found!)</returns>
+        /// 
+        /// To get special playlists on Youtube, use these prefixes to current channel ID.
+        /// !!! Keep in mind, ChannelId is UC[Id]
+        /// Favorites:   FL[Id]
+        /// Likes:       LL[Id]
+        /// Uploads:     Ul[Id]
+        /// History:     HL            (no ChannelId, but OAuth)
+        /// Watch later: WL            (no ChannelId, but OAuth)
         public override bool Search(PlaylistSearchArguments arg)
         {
             Arguments = arg;
@@ -111,7 +170,7 @@ namespace YoutifyLib.YouTube
 
             try
             {
-                var request = Service.Playlists.List("id, snippet, status");
+                var request = Service.Playlists.List("id, snippet");
                 request.MaxResults = Arguments.MaxResults;
 
                 switch (Arguments.Type)

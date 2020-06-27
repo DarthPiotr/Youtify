@@ -21,13 +21,17 @@ namespace YoutifyConsole
             YouTubeHandler yth = new YouTubeHandler();
             HandlerBase service = yth;
 
+
+            var id = ((YouTubePlaylistsHandler)service.PlaylistsPage).GetId();
+
             // request first page
             var arg = new PlaylistSearchArguments {
-                Type = PlaylistSearchType.Id,
-                ChannelId = "UCU9pX8hKcrx06XfOB-VQLdw", // for testing
-                PlaylistId = "PLQQAs5duqv7JHWj9UZ_mECyZcqQ5TS6ZB", // for testing
+                Type = PlaylistSearchType.Channel,
+                ChannelId = "UC" + id, // for testing
+                PlaylistId = "FL" + id, // for testing
                 MaxResults = 10
             };
+
 
             // try to call next/prev page beofre Search()
             //service.PlaylistsPage.NextPage(); // works fine
