@@ -9,7 +9,7 @@ namespace YoutifyLib.YouTube
     /// <summary>
     /// Handles lists of Playlists on YouTube
     /// </summary>
-    public class YouTubePlaylistsHandler : PaginationHandler
+    public class YouTubePlaylistsHandler : PlaylistsHandler
     {
         /// <summary>
         /// You Tube API service used to get playlists 
@@ -26,6 +26,12 @@ namespace YoutifyLib.YouTube
         /// </summary>
         private string NextPageToken { set; get; }
 
+        private PlaylistSearchArguments Arguments { set; get; } = null;
+
+        /// <summary>
+        /// Specifies how many results will be shown per page
+        /// </summary>
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -37,8 +43,10 @@ namespace YoutifyLib.YouTube
             NextPageToken = null;
         }
 
-        public override bool FirstPage()
+        public override bool Search(PlaylistSearchArguments arg)
         {
+            Arguments = arg;
+
             Utils.LogInfo("Requested first page");
             var request = Task.Run(() => GetPlaylistPageAsync(null));
             request.Wait();
@@ -53,7 +61,10 @@ namespace YoutifyLib.YouTube
         public override bool NextPage()
         {
             if (NextPageToken == null)
+            {
+                Utils.LogWarning("Called Next Page when there was no next page!");
                 return false;
+            }
 
             Utils.LogInfo("Requested next page");
             var request = Task.Run(() => GetPlaylistPageAsync(NextPageToken));
@@ -69,7 +80,10 @@ namespace YoutifyLib.YouTube
         public override bool PrevPage()
         {
             if (PrevPageToken == null)
+            {
+                Utils.LogWarning("Called Next Page when there was no next page!");
                 return false;
+            }
 
             Utils.LogInfo("Requested previous page");
             var request = Task.Run(() => GetPlaylistPageAsync(PrevPageToken));
@@ -89,10 +103,31 @@ namespace YoutifyLib.YouTube
         /// <returns>Asynchronus task</returns>
         private async Task<PlaylistListResponse> GetPlaylistPageAsync(string pageToken)
         {
+            if(Arguments == null)
+            {
+                Utils.LogError("No arguments were passed to search.");
+                return null;
+            }
+
             try
             {
-                var request = Service.Playlists.List("id, snippet");
-                request.Mine = true;
+                var request = Service.Playlists.List("id, snippet, status");
+                request.MaxResults = Arguments.MaxResults;
+
+                switch (Arguments.Type)
+                {
+                    case PlaylistSearchType.Mine:
+                        request.Mine = true;
+                        break;
+                    case PlaylistSearchType.Channel:
+                        request.ChannelId = Arguments.ChannelId;
+                        break;
+                    case PlaylistSearchType.Id:
+                        request.Id = Arguments.PlaylistId;
+                        break;
+                }
+
+                
                 if (pageToken != null)
                     request.PageToken = pageToken;
                 /*

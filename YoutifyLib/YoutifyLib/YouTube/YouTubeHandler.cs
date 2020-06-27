@@ -22,9 +22,8 @@ namespace YoutifyLib.YouTube
         /// </summary>
         private YouTubeService Service { get; set; }
 
-        public YouTubeHandler()
+        public YouTubeHandler() : base()
         {
-            Task.Run(ServiceInit).Wait();
             PlaylistsPage = new YouTubePlaylistsHandler(Service);
         }
 
@@ -32,7 +31,7 @@ namespace YoutifyLib.YouTube
         /// Setting up YouTube Service with API key and OAuth
         /// </summary>
         /// <returns>Task to setup YT Service</returns>
-        private async Task ServiceInit()
+        protected async override Task ServiceInitAsync()
         {
             Utils.LogInfo("Initializing service...");
             try

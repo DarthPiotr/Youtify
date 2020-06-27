@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -21,40 +22,53 @@ namespace YoutifyConsole
             HandlerBase service = yth;
 
             // request first page
-            service.PlaylistsPage.FirstPage();
+            var arg = new PlaylistSearchArguments {
+                Type = PlaylistSearchType.Id,
+                ChannelId = "UCU9pX8hKcrx06XfOB-VQLdw", // for testing
+                PlaylistId = "PLQQAs5duqv7JHWj9UZ_mECyZcqQ5TS6ZB", // for testing
+                MaxResults = 10
+            };
+
+            // try to call next/prev page beofre Search()
+            //service.PlaylistsPage.NextPage(); // works fine
+            //service.PlaylistsPage.PrevPage(); // works fine
+
+            service.PlaylistsPage.Search(arg);
             Utils.LogInfo("First page loaded");
             WritePlaylists(service.PlaylistsPage.CurrentList);
-
+            
             string key;
             while ((key = Console.ReadLine().ToString().ToLower()) != "q")
             {
                 if (key == "n")
                 {
                     // request next page
-                    service.PlaylistsPage.NextPage();
-                    Utils.LogInfo("Next page loaded");
-                    WritePlaylists(service.PlaylistsPage.CurrentList);
+                    if (service.PlaylistsPage.NextPage())
+                    {
+                        Utils.LogInfo("Next page loaded");
+                        WritePlaylists(service.PlaylistsPage.CurrentList);
+                    }
                 }
 
                 if (key == "p")
                 {
                     // request previous page
-                    service.PlaylistsPage.PrevPage();
-                    Utils.LogInfo("Prev page loaded");
-                    WritePlaylists(service.PlaylistsPage.CurrentList);
+                    if (service.PlaylistsPage.PrevPage())
+                    {
+                        Utils.LogInfo("Prev page loaded");
+                        WritePlaylists(service.PlaylistsPage.CurrentList);
+                    }
                 }
             }
 
             Console.WriteLine("Test completed!");
-
-            Console.ReadKey();
         }
 
-        static void WritePlaylists(List<Playlist> list)
+        static void WritePlaylists(IList list)
         {
             Console.WriteLine("\n----- Writing page: ----");
             int i = 0;
-            foreach (var e in list)
+            foreach (var e in (List<Playlist>)list)
             {
                 Console.WriteLine(String.Format("[{1}] {0}", e.Title, ++i));
             }
