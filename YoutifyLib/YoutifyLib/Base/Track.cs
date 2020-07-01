@@ -12,11 +12,11 @@ namespace YoutifyLib
         /// <summary>
         /// Title of the track
         /// </summary>
-        string Title { get; set; }
+        public string Title { get; set; }
         /// <summary>
         /// Creator of a track
         /// </summary>
-        string Artist { get; set; }
+        public string Artist { get; set; }
 
     }
 }

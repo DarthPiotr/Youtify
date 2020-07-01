@@ -11,31 +11,24 @@ namespace YoutifyLib.YouTube
     /// </summary>
     public class YouTubePlaylistsHandler : PlaylistsHandler
     {
+        ///////////////////////////////////
+        // Properties
         /// <summary>
         /// You Tube API service used to get playlists 
         /// </summary>
         private YouTubeService Service { get; }
-
         /// <summary>
         /// Token to the previous page provided by API. May be null.
         /// </summary>
         private string PrevPageToken { set; get; }
-
         /// <summary>
         /// Token to the next page provided by API. May be null.
         /// </summary>
         private string NextPageToken { set; get; }
-
         private PlaylistSearchArguments Arguments { set; get; } = null;
-        /// <summary>
-        /// stores ChannelID if it was already resolved.
-        /// </summary>
-        private string channelId;
 
-        /// <summary>
-        /// Specifies how many results will be shown per page
-        /// </summary>
-
+        //////////////////////////////////////
+        //  Constructors
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -46,49 +39,50 @@ namespace YoutifyLib.YouTube
             PrevPageToken = null;
             NextPageToken = null;
         }
-       
-        /// <summary>
-        /// Returns id of a channel, without UC prefix.
-        /// </summary>
-        /// <param name="channelName">A channel name to resolve.
-        /// Leave empty or null to resolve current channel (OAuth)</param>
-        /// <returns>Id of a channel, without UC prefix</returns>
-        public string GetId(string channelName = null)
-        {
-            if (channelId   != null &&
-                channelName == null )
-                return channelId;
 
-            // FLaFUy4CSusl-0SBefzAS6LA
+
+        ///////////////////////////////////////
+        // Public methods
+        /// <summary>
+        /// Creates a playlist, using YouTube API.
+        /// </summary>
+        /// <param name="playlist">Playlist to be created</param>
+        /// <returns>Id of created playlist</returns>
+        public override string CreatePlaylist(Playlist playlist)
+        {
+            if(string.IsNullOrWhiteSpace(playlist.Title))
+            {
+                Utils.LogError("Tried to create playlist with no title!");
+                return null;
+            }
 
             var request = Task.Run(() =>
             {
                 try
                 {
-                    var req = Service.Channels.List("id");
-                    if (channelName == null)
-                        req.Mine = true;
-                    else
-                        req.ForUsername = channelName;
+                    var ytPlaylist = ((YouTubePlaylist)playlist).GetYouTubePlaylist();
+                    var req = Service.Playlists.Insert( ytPlaylist , "id, snippet, status");
 
                     var res = req.ExecuteAsync();
                     return res;
                 }
                 catch (Exception e)
                 {
-                    Utils.LogError(e.Message);
+                    Utils.LogError("Inside CreatePlaylist: {0}", e.Message);
                     return null;
                 }
             });
             request.Wait();
 
-            var result = request.Result;
-            if (channelId != null &&
-                channelName == null)
-                channelId = result.Items[0].Id.Substring(2);
-            return result.Items[0].Id.Substring(2);
+            if (request.Result == null)
+            {
+                Utils.LogError("Playlist creation returned null.");
+                return null;
+            }
+
+            return request.Result.Id;
+
         }
-       
         /// <summary>
         /// Search for the playlist(s) with specified arguments.
         /// </summary>
@@ -116,7 +110,6 @@ namespace YoutifyLib.YouTube
             EvalResult(request.Result);
             return true;
         }
-
         public override bool NextPage()
         {
             if (NextPageToken == null)
@@ -135,7 +128,6 @@ namespace YoutifyLib.YouTube
             EvalResult(request.Result);
             return true;
         }
-
         public override bool PrevPage()
         {
             if (PrevPageToken == null)
@@ -154,7 +146,87 @@ namespace YoutifyLib.YouTube
             EvalResult(request.Result);
             return true;
         }
+        /// <summary>
+        /// Gets contents of a playlist, using YouTube API.
+        /// Sets the Songs property.
+        /// </summary>
+        /// <returns>If the operation was successful</returns>
+        public override bool GetPlaylistContents(Playlist playlist)
+        {
+            if (!(playlist is YouTubePlaylist))
+            {
+                Utils.LogError("Tried to fetch contents of playlist that is not compatible with YouTube API.");
+                return false;
+            }
 
+            YouTubePlaylist pl = (YouTubePlaylist)playlist;
+
+            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.ID);
+
+            try
+            {
+                var nextToken = "";
+                while (nextToken != null)
+                {
+                    var request = Task.Run(() =>
+                    {
+                        var req = Service.PlaylistItems.List("snippet");
+                        req.PlaylistId = pl.ID;
+                        req.MaxResults = 20;
+                        req.PageToken = nextToken;
+
+                        var res = req.ExecuteAsync();
+                        return res;
+                    });
+                    request.Wait();
+                    Utils.LogInfo("[Playlist] Fetched {0} tracks", request.Result.Items.Count);
+
+                    foreach (var item in request.Result.Items)
+                    {
+                        var vidRequest = Task.Run(() =>
+                        {
+                            var req = Service.Videos.List("snippet");
+                            req.Id = item.Snippet.ResourceId.VideoId;
+                            var res = req.ExecuteAsync();
+                            return res;
+                        });
+
+                        try
+                        {
+                            vidRequest.Wait();
+                        }
+                        catch (Exception ex)
+                        {
+                            Utils.LogError("While trying to fetch video : {1}, exception was thrown at GetPlaylistContents: {0} ", ex.Message, item.Snippet.ResourceId.VideoId);
+                            continue;
+                        }
+                        if (vidRequest.Result.Items.Count > 0)
+                        {
+                            var e = vidRequest.Result.Items[0];
+
+                            playlist.Songs.Add(new YouTubeTrack(e));
+                            Utils.LogInfo("[Video] {0} added", e.Snippet.Title);
+                        }
+                        else
+                        {
+                            Utils.LogWarning("[Video] While trying to fetch video : {0} ({1}), API returned no results!",
+                                item.Snippet.Title, item.Snippet.ResourceId.VideoId);
+                        }
+                    }
+                    nextToken = request.Result.NextPageToken;
+                }   
+            }
+            catch(Exception e)
+            {
+                Utils.LogError("In GetPlaylistContents: {0}", e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        ////////////////////////////////////
+        // Private methods
         /// <summary>
         /// Requests page async from the list of Playlists on User's channel
         /// </summary>
@@ -170,7 +242,7 @@ namespace YoutifyLib.YouTube
 
             try
             {
-                var request = Service.Playlists.List("id, snippet");
+                var request = Service.Playlists.List("id, snippet, status");
                 request.MaxResults = Arguments.MaxResults;
 
                 switch (Arguments.Type)
@@ -199,11 +271,10 @@ namespace YoutifyLib.YouTube
             }
             catch (Exception e)
             {
-                Utils.LogError(e.Message);
+                Utils.LogError("In GetPlaylistPageAsync {0}", e.Message);
                 return null;
             }
         }
-
         /// <summary>
         /// Processes the result of API
         /// </summary>
@@ -216,8 +287,15 @@ namespace YoutifyLib.YouTube
 
                 List<Playlist> YTlist = new List<Playlist>();
                 foreach (var elem in response.Items)
-                    YTlist.Add(new YouTubePlaylist(elem.Snippet.Title, elem.Snippet.Description, elem.Id));
+                    YTlist.Add(new YouTubePlaylist(
+                        elem.Snippet.Title,
+                        elem.Snippet.Description,
+                        elem.Id,
+                        elem.Status.PrivacyStatus
+                    ));
 
+                // Override current playlist. Required for pagination.
+                // Saving results should be handled outside of the library.
                 CurrentList = YTlist;
             }
         }
