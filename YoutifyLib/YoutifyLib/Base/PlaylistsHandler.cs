@@ -24,5 +24,17 @@ namespace YoutifyLib
         /// IPagination implementatnion required
         /// </summary>
         public abstract bool PrevPage();
+        /// <summary>
+        /// Creates a playlist, using proper API.
+        /// </summary>
+        /// <param name="playlist">Playlist to be created</param>
+        /// <returns>Id of created playlist</returns>
+        public abstract string CreatePlaylist(Playlist playlist);
+        /// <summary>
+        /// Gets contents of a playlist, using proper API. Sets the Playlist's Songs property.
+        /// </summary>
+        /// <param name="playlist">Playlist to be fetched</param>
+        /// <returns>If the operation was successful</returns>
+        public abstract bool GetPlaylistContents(Playlist playlist);
     }
 }

@@ -42,7 +42,9 @@ namespace YoutifyLib.YouTube
                 {
                     credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                         GoogleClientSecrets.Load(stream).Secrets,
-                        new[] { YouTubeService.Scope.YoutubeReadonly },
+                        // This OAuth 2.0 access scope allows for full read/write access to the
+                        // authenticated user's account.
+                        new[] { YouTubeService.Scope.Youtube },
                         "user",
                         CancellationToken.None,
                         new FileDataStore(this.GetType().ToString())
@@ -64,6 +66,44 @@ namespace YoutifyLib.YouTube
             }
             Debug.WriteLine("Initializing service done!");
         }
+        /// <summary>
+        /// Returns id of a channel, without UC prefix.
+        /// </summary>
+        /// <param name="channelName">A channel name to resolve.
+        /// Leave empty or null to resolve current channel (OAuth)</param>
+        /// <returns>Id of a channel, without UC prefix</returns>
+        public override string GetId(string channelName = null)
+        {
+            if (channelId != null &&
+                channelName == null)
+                return channelId;
 
+            var request = Task.Run(() =>
+            {
+                try
+                {
+                    var req = Service.Channels.List("id");
+                    if (channelName == null)
+                        req.Mine = true;
+                    else
+                        req.ForUsername = channelName;
+
+                    var res = req.ExecuteAsync();
+                    return res;
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError(e.Message);
+                    return null;
+                }
+            });
+            request.Wait();
+
+            var result = request.Result;
+            if (channelId != null &&
+                channelName == null)
+                channelId = result.Items[0].Id.Substring(2);
+            return result.Items[0].Id.Substring(2);
+        }
     }
 }
