@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using YoutifyLib;
 using YoutifyLib.YouTube;
+using YoutifyLib.Algorithm;
 
 namespace YoutifyConsole
 {
@@ -17,12 +18,16 @@ namespace YoutifyConsole
         {
             Console.WriteLine("This is a test");
 
+            Algorithm.GetArtist("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean", "Calvin Harris");
+            Algorithm.GetArtist("Nils Van Zandt & Fatman Scoop feat EMB - Destination Paradise (Radio Edit)", "Happy Music");
+
+
             ///////////////////////////////////////////////////////
             //
             // create YouTube handler and treat it as a generic one
             //
-            YouTubeHandler yth = new YouTubeHandler();
-            HandlerBase service = yth;
+            /*YouTubeHandler yth = new YouTubeHandler();
+            HandlerBase service = yth;*/
 
             // try to call next/prev page beofre Search()
             //service.PlaylistsPage.NextPage(); // works fine
@@ -58,12 +63,12 @@ namespace YoutifyConsole
             }
             while (num < 1 || num > service.PlaylistsPage.CurrentList.Count);
             num--;*/
-            var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
+            /*var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
             Console.WriteLine("Please wait, while API fetches your videos");
             var res = service.PlaylistsPage.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
             Console.WriteLine("Was fetching successful? " + res);
             if (res)
-                WritePlaylistContents(pl);
+                WritePlaylistContents(pl);*/
                 
 
             /*Console.WriteLine("Attempting to create playlist...");
