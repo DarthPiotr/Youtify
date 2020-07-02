@@ -25,14 +25,14 @@ namespace YoutifyConsole
             HandlerBase service = yth;
 
             // try to call next/prev page beofre Search()
-            //service.PlaylistsPage.NextPage(); // works fine
-            //service.PlaylistsPage.PrevPage(); // works fine
+            service.PlaylistsPage.NextPage(); // works fine
+            service.PlaylistsPage.PrevPage(); // works fine
 
             //////////////////////////////////////
             // 
             // Fetch first page of playlists
             //
-            /*
+            
             string id = service.GetId();
             var arg = new PlaylistSearchArguments
             {
@@ -43,7 +43,7 @@ namespace YoutifyConsole
             };
             service.PlaylistsPage.Search(arg);
             Utils.LogInfo("First page loaded");
-            WritePlaylists(service.PlaylistsPage.CurrentList);*/
+            WritePlaylists(service.PlaylistsPage.CurrentList);
 
             /////////////////////////////////////////
             //
@@ -58,19 +58,29 @@ namespace YoutifyConsole
             }
             while (num < 1 || num > service.PlaylistsPage.CurrentList.Count);
             num--;*/
+            /*
             var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
             Console.WriteLine("Please wait, while API fetches your videos");
-            var res = service.PlaylistsPage.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
+            var res = service.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
             Console.WriteLine("Was fetching successful? " + res);
             if (res)
-                WritePlaylistContents(pl);
+                WritePlaylistContents(pl);*/
                 
 
-            /*Console.WriteLine("Attempting to create playlist...");
-            Playlist pl = new Playlist("XXX", "samo dobro", "prublic");
-            string plid = yth.PlaylistsPage.CreatePlaylist(pl);
-            Console.WriteLine("Created a playlist with id: " + plid);*/
-            
+           // Console.WriteLine("Attempting to create playlist...");
+            //Playlist pl = new YouTubePlaylist("XXX", "samo dobro", "PLQQAs5duqv7JXHN-eOp33tX84X1gduGjU", "private");
+            //string plid = yth.CreatePlaylist(pl);
+            //Console.WriteLine("Created a playlist with id: " + plid);
+            //YouTubePlaylist ypl = (YouTubePlaylist)pl;
+            //ypl.ID = plid;
+            /*
+            Console.WriteLine("Attempting to add track to the playlist...");
+            Track t = new YouTubeTrack {
+                ID = "ozv4q2ov3Mk"//"OdxFL7EQOPU"
+            };
+            yth.AddTrackToPlaylist(ypl, t);
+            Console.WriteLine("Track successfully added to the playlist!");*/
+
             /*
             string key;
             while ((key = Console.ReadLine().ToString().ToLower()) != "q")

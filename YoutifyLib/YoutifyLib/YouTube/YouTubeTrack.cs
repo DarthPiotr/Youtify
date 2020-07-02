@@ -21,5 +21,20 @@ namespace YoutifyLib.YouTube
         /// YouTube ID of a track
         /// </summary>
         public string ID { get; set; }
+
+        public Google.Apis.YouTube.v3.Data.PlaylistItem ToPlaylistItem(string playlistId)
+        {
+            return new PlaylistItem {
+                Snippet = new PlaylistItemSnippet
+                {
+                    ResourceId = new ResourceId
+                    {
+                        Kind = "youtube#video",
+                        VideoId = ID,
+                        PlaylistId = playlistId
+                    }
+                }
+            };
+        }
     }
 }

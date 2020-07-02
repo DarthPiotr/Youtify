@@ -37,5 +37,27 @@ namespace YoutifyLib
         /// Should be used only be GetId method.
         /// </summary>
         protected string channelId;
+
+        /// <summary>
+        /// Creates a playlist, using proper API.
+        /// </summary>
+        /// <param name="playlist">Playlist to be created</param>
+        /// <returns>Id of created playlist</returns>
+        public abstract string CreatePlaylist(Playlist playlist);
+        /// <summary>
+        /// Gets contents of a playlist, using proper API. Sets the Playlist's Songs property.
+        /// </summary>
+        /// <param name="playlist">Playlist to be fetched</param>
+        /// <returns>If the operation was successful</returns>
+        public abstract bool GetPlaylistContents(Playlist playlist);
+        /// <summary>
+        /// Adds track to the playlist, using proper API. Updates playlist's Songs property.
+        /// </summary>
+        /// <param name="playlist">Playlist to be modified</param>
+        /// <param name="track">Track to be added</param>
+        /// <param name="position">Optional position of the track. Leave empty to add at the end of the playlist
+        /// </param>
+        /// <returns>If the operation was successful</returns>
+        public abstract bool AddTrackToPlaylist(Playlist playlist, Track track, int position = -1);
     }
 }

@@ -13,6 +13,7 @@ namespace YoutifyLib.YouTube
     {
         ///////////////////////////////////
         // Properties
+
         /// <summary>
         /// You Tube API service used to get playlists 
         /// </summary>
@@ -29,6 +30,7 @@ namespace YoutifyLib.YouTube
 
         //////////////////////////////////////
         //  Constructors
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -40,62 +42,9 @@ namespace YoutifyLib.YouTube
             NextPageToken = null;
         }
 
-
         ///////////////////////////////////////
         // Public methods
-        /// <summary>
-        /// Creates a playlist, using YouTube API.
-        /// </summary>
-        /// <param name="playlist">Playlist to be created</param>
-        /// <returns>Id of created playlist</returns>
-        public override string CreatePlaylist(Playlist playlist)
-        {
-            if(string.IsNullOrWhiteSpace(playlist.Title))
-            {
-                Utils.LogError("Tried to create playlist with no title!");
-                return null;
-            }
 
-            var request = Task.Run(() =>
-            {
-                try
-                {
-                    var ytPlaylist = ((YouTubePlaylist)playlist).GetYouTubePlaylist();
-                    var req = Service.Playlists.Insert( ytPlaylist , "id, snippet, status");
-
-                    var res = req.ExecuteAsync();
-                    return res;
-                }
-                catch (Exception e)
-                {
-                    Utils.LogError("Inside CreatePlaylist: {0}", e.Message);
-                    return null;
-                }
-            });
-            request.Wait();
-
-            if (request.Result == null)
-            {
-                Utils.LogError("Playlist creation returned null.");
-                return null;
-            }
-
-            return request.Result.Id;
-
-        }
-        /// <summary>
-        /// Search for the playlist(s) with specified arguments.
-        /// </summary>
-        /// <param name="arg">Arguments to search with</param>
-        /// <returns>If operation was successfull (Can be true if nothing was found!)</returns>
-        /// 
-        /// To get special playlists on Youtube, use these prefixes to current channel ID.
-        /// !!! Keep in mind, ChannelId is UC[Id]
-        /// Favorites:   FL[Id]
-        /// Likes:       LL[Id]
-        /// Uploads:     Ul[Id]
-        /// History:     HL            (no ChannelId, but OAuth)
-        /// Watch later: WL            (no ChannelId, but OAuth)
         public override bool Search(PlaylistSearchArguments arg)
         {
             Arguments = arg;
@@ -114,7 +63,7 @@ namespace YoutifyLib.YouTube
         {
             if (NextPageToken == null)
             {
-                Utils.LogWarning("Called Next Page when there was no next page!");
+                Utils.LogWarning("Called NextPage when there was no next page!");
                 return false;
             }
 
@@ -132,7 +81,7 @@ namespace YoutifyLib.YouTube
         {
             if (PrevPageToken == null)
             {
-                Utils.LogWarning("Called Next Page when there was no next page!");
+                Utils.LogWarning("Called PrevPage when there was no next page!");
                 return false;
             }
 
@@ -146,87 +95,10 @@ namespace YoutifyLib.YouTube
             EvalResult(request.Result);
             return true;
         }
-        /// <summary>
-        /// Gets contents of a playlist, using YouTube API.
-        /// Sets the Songs property.
-        /// </summary>
-        /// <returns>If the operation was successful</returns>
-        public override bool GetPlaylistContents(Playlist playlist)
-        {
-            if (!(playlist is YouTubePlaylist))
-            {
-                Utils.LogError("Tried to fetch contents of playlist that is not compatible with YouTube API.");
-                return false;
-            }
-
-            YouTubePlaylist pl = (YouTubePlaylist)playlist;
-
-            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.ID);
-
-            try
-            {
-                var nextToken = "";
-                while (nextToken != null)
-                {
-                    var request = Task.Run(() =>
-                    {
-                        var req = Service.PlaylistItems.List("snippet");
-                        req.PlaylistId = pl.ID;
-                        req.MaxResults = 20;
-                        req.PageToken = nextToken;
-
-                        var res = req.ExecuteAsync();
-                        return res;
-                    });
-                    request.Wait();
-                    Utils.LogInfo("[Playlist] Fetched {0} tracks", request.Result.Items.Count);
-
-                    foreach (var item in request.Result.Items)
-                    {
-                        var vidRequest = Task.Run(() =>
-                        {
-                            var req = Service.Videos.List("snippet");
-                            req.Id = item.Snippet.ResourceId.VideoId;
-                            var res = req.ExecuteAsync();
-                            return res;
-                        });
-
-                        try
-                        {
-                            vidRequest.Wait();
-                        }
-                        catch (Exception ex)
-                        {
-                            Utils.LogError("While trying to fetch video : {1}, exception was thrown at GetPlaylistContents: {0} ", ex.Message, item.Snippet.ResourceId.VideoId);
-                            continue;
-                        }
-                        if (vidRequest.Result.Items.Count > 0)
-                        {
-                            var e = vidRequest.Result.Items[0];
-
-                            playlist.Songs.Add(new YouTubeTrack(e));
-                            Utils.LogInfo("[Video] {0} added", e.Snippet.Title);
-                        }
-                        else
-                        {
-                            Utils.LogWarning("[Video] While trying to fetch video : {0} ({1}), API returned no results!",
-                                item.Snippet.Title, item.Snippet.ResourceId.VideoId);
-                        }
-                    }
-                    nextToken = request.Result.NextPageToken;
-                }   
-            }
-            catch(Exception e)
-            {
-                Utils.LogError("In GetPlaylistContents: {0}", e.Message);
-                return false;
-            }
-
-            return true;
-        }
 
         ////////////////////////////////////
         // Private methods
+
         /// <summary>
         /// Requests page async from the list of Playlists on User's channel
         /// </summary>
