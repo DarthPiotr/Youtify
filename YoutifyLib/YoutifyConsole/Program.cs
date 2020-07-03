@@ -18,9 +18,27 @@ namespace YoutifyConsole
         {
             Console.WriteLine("This is a test");
 
-            Algorithm.GetArtist("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean", "Calvin Harris");
-            Algorithm.GetArtist("Nils Van Zandt & Fatman Scoop feat EMB - Destination Paradise (Radio Edit)", "Happy Music");
+            // feat
+            Algorithm.GetMetadata("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean");
+            // edit / remix
+            Algorithm.GetMetadata("Nils Van Zandt & Fatman Scoop feat EMB - Destination Paradise (Radio Edit)");
+            Algorithm.GetMetadata("Avancada vs Darius & Finlay - Xplode (Grahham Bell & Yoel Lewis Remix)");
+            // hashtag
+            Algorithm.GetMetadata("The Space Brothers - Shine (Jorn van Deynhoven Remix) [#ASOTIbiza2017]");
 
+            // no separator
+            Algorithm.GetMetadata("Lonely For You (Club Mix)");
+            // nested brackets
+            Algorithm.GetMetadata("Oh (Yes I Am) (Oh (Yes I Am))");
+
+            // different separator -
+            // feat inside a bracket
+            Algorithm.GetMetadata("Robin Schulz – OK (feat. James Blunt) (Official Music Video)");
+            // remix outside of a bracket
+            Algorithm.GetMetadata("Tove Lo - Habits (Stay High) - Hippie Sabotage Remix");
+            
+            // russian lol
+            Algorithm.GetMetadata("Элджей - Рваные джинсы");
 
             ///////////////////////////////////////////////////////
             //
