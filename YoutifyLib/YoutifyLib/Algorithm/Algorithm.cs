@@ -27,7 +27,7 @@ namespace YoutifyLib.Algorithm
         /// <summary>
         /// Strings that divide artists
         /// </summary>
-        public static List<string> artistDiv        = new List<string> { "vs", "vs.", "x", "&", "," };
+        public static List<string> artistDiv        = new List<string> { "vs", "vs.", " x ", "&", "," };
         /// <summary>
         /// Strings that a bracket content that will be ignored
         /// </summary>
@@ -126,7 +126,7 @@ namespace YoutifyLib.Algorithm
                 if (tmpi != -1) // if found
                 {
                     featPart = TrimFeaturing(snippet.Substring(tmpi+1), div); // cut "featuring" part
-                    snippet = snippet.Substring(0, tmpi-1);  // make snippet without "featuring" part
+                    snippet = snippet.Substring(0, tmpi);  // make snippet without "featuring" part
                     break;
                 }
             }
@@ -182,10 +182,8 @@ namespace YoutifyLib.Algorithm
                 }
             }
 
-            // remove mutliple spaces left after removing brackets
-            Regex regex = new Regex("[ ]{2,}", RegexOptions.None);
-            regex.Replace(newSnipp, " ");
-            snippet = newSnipp.Trim();
+            // remove mutliple spaces left after removing brackets           
+            snippet = Utils.RemoveDoubleSpaces(newSnipp).Trim();
 
             // return list of bracket contents
             return list;

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace YoutifyLib
 {
@@ -24,5 +25,13 @@ namespace YoutifyLib
             => Debug.WriteLine("[INFO]: " + message);
         public static void LogInfo(string format, params object[] args)
             => Debug.WriteLine("[INFO]: " + string.Format(format, args));
+
+        ///////////////////////////////////
+        //     Text Processing
+        public static string RemoveDoubleSpaces(string input)
+        {
+            Regex regex = new Regex("[ ]{2,}", RegexOptions.None);
+            return regex.Replace(input, " ");
+        }
     }
 }

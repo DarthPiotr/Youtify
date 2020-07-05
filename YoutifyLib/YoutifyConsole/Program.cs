@@ -19,17 +19,20 @@ namespace YoutifyConsole
             Console.WriteLine("This is a test");
 
             // feat
-            Algorithm.GetMetadata("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean");
+            Console.WriteLine(Algorithm.GetMetadata("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean").GetSearchString());
             // edit / remix
-            Algorithm.GetMetadata("Nils Van Zandt & Fatman Scoop feat EMB - Destination Paradise (Radio Edit)");
-            Algorithm.GetMetadata("Avancada vs Darius & Finlay - Xplode (Grahham Bell & Yoel Lewis Remix)");
+            Console.WriteLine(Algorithm.GetMetadata("Nils Van Zandt & Fatman Scoop feat EMB - Destination Paradise (Radio Edit)").GetSearchString());
+            Console.WriteLine(Algorithm.GetMetadata("Avancada vs Darius & Finlay - Xplode (Grahham Bell & Yoel Lewis Remix)").GetSearchString());
             // hashtag
-            Algorithm.GetMetadata("The Space Brothers - Shine (Jorn van Deynhoven Remix) [#ASOTIbiza2017]");
+            Console.WriteLine(Algorithm.GetMetadata("The Space Brothers - Shine (Jorn van Deynhoven Remix) [#ASOTIbiza2017]").GetSearchString());
 
             // no separator
-            Algorithm.GetMetadata("Lonely For You (Club Mix)");
+            Console.WriteLine(Algorithm.GetMetadata("Lonely For You (Club Mix)").GetSearchString());
             // nested brackets
-            Algorithm.GetMetadata("Oh (Yes I Am) (Oh (Yes I Am))");
+            Console.WriteLine(Algorithm.GetMetadata("Oh (Yes I Am) (Oh (Yes I Am))").GetSearchString());
+
+            // comma -> multiple information in bracket
+            Console.WriteLine(Algorithm.GetMetadata("Junior Senior - Move Your Feet (Official music video, HD)").GetSearchString());
 
             // different separator -
             // feat inside a bracket
