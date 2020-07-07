@@ -27,7 +27,7 @@ namespace YoutifyLib.Algorithm
         /// <summary>
         /// Strings that divide artists
         /// </summary>
-        public static List<string> artistDiv        = new List<string> { "vs", "vs.", " x ", "&", "," };
+        public static List<string> artistDiv        = new List<string> { " vs ", " vs. ", " x ", " and ", "&", "," };
         /// <summary>
         /// Strings that a bracket content that will be ignored
         /// </summary>
@@ -53,6 +53,8 @@ namespace YoutifyLib.Algorithm
 
             string lowtitle = title.ToLower();  // copy title in lowercase
             
+            // entering messy part.
+            // good luck :)
 
             // remove unwanted characters, ie. " '
             foreach (var c in removeChars)
@@ -102,9 +104,26 @@ namespace YoutifyLib.Algorithm
             if (string.IsNullOrEmpty(meta.Featuring))
                 meta.Featuring = ExtractFeatPart(ref artistPart);
 
-            // remaining part must be the title and artist.
-            meta.Title = titlePart;
-            meta.Artist = artistPart;
+
+            // in case there is still some info, divide the rest again
+            titleBrackets = new List<string>(titlePart.Split(generalDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries));
+            // first part is usually the title
+            meta.Title = titleBrackets[0];
+            // and handle the rest, as if in brackets
+            for (i = 1; i < titleBrackets.Count; i++) 
+                HandleBracketsContent(titleBrackets[i].Trim(), meta);
+
+            // the same if artist is not empty
+            if (artistPart != "")
+            {
+                // in case there is still some info, divide the rest again
+                artistBrackets = new List<string>(artistPart.Split(generalDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries));
+                // first part is usually the title
+                meta.Artist = artistBrackets[0];
+                // and handle the rest, as if in brackets
+                for (i = 1; i < artistBrackets.Count; i++)
+                    HandleBracketsContent(artistBrackets[i].Trim(), meta);
+            }
 
             return meta;
         }

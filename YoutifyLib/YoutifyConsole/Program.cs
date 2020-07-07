@@ -32,16 +32,19 @@ namespace YoutifyConsole
             Console.WriteLine(Algorithm.GetMetadata("Oh (Yes I Am) (Oh (Yes I Am))").GetSearchString());
 
             // comma -> multiple information in bracket
-            Console.WriteLine(Algorithm.GetMetadata("Junior Senior - Move Your Feet (Official music video, HD)").GetSearchString());
+             Console.WriteLine(Algorithm.GetMetadata("Junior Senior - Move Your Feet (Official music video, HD)").GetSearchString());
+
+            // useless extra title
+            Console.WriteLine(Algorithm.GetMetadata("Michael Jackson - They Don’t Care About Us (Brazil Version) (Official Video)").GetSearchString());
 
             // different separator -
             // feat inside a bracket
-            Algorithm.GetMetadata("Robin Schulz – OK (feat. James Blunt) (Official Music Video)");
+            Console.WriteLine(Algorithm.GetMetadata("Robin Schulz – OK (feat. James Blunt) (Official Music Video)").GetSearchString());
             // remix outside of a bracket
-            Algorithm.GetMetadata("Tove Lo - Habits (Stay High) - Hippie Sabotage Remix");
+            Console.WriteLine(Algorithm.GetMetadata("Tove Lo - Habits (Stay High) - Hippie Sabotage Remix").GetSearchString());
             
             // russian lol
-            Algorithm.GetMetadata("Элджей - Рваные джинсы");
+            Console.WriteLine(Algorithm.GetMetadata("Элджей - Рваные джинсы").GetSearchString());
 
             ///////////////////////////////////////////////////////
             //

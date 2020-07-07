@@ -31,7 +31,7 @@ namespace YoutifyLib.Algorithm
         /// </summary>
         public string Mix           { get; set; } = "";
 
-        public string GetSearchString()
+        public string GetSearchString(bool includeExtraTitle = true)
         {
             string search = "";
             // Remix artist is prefered to original artist
@@ -51,9 +51,11 @@ namespace YoutifyLib.Algorithm
             // add title
             if(!string.IsNullOrEmpty(Title))
                 search += Title + " ";
-            if (!string.IsNullOrEmpty(TitleExtra))
+            // and extra title if wanted
+            if (includeExtraTitle && !string.IsNullOrEmpty(TitleExtra))
                 search += TitleExtra + " ";
 
+            // add mix info
             if (!string.IsNullOrEmpty(Mix))
                 search += Mix;
 
