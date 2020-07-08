@@ -24,9 +24,11 @@ namespace YoutifyConsole
             YouTubeHandler yth = new YouTubeHandler();
             HandlerBase service = yth;
 
+            Console.WriteLine(((YouTubeTrack)service.SearchForTracks("never gonna give you up")[0]).ID);
+
             // try to call next/prev page beofre Search()
-            service.PlaylistsPage.NextPage(); // works fine
-            service.PlaylistsPage.PrevPage(); // works fine
+           // service.PlaylistsPage.NextPage(); // works fine
+           // service.PlaylistsPage.PrevPage(); // works fine
 
             //////////////////////////////////////
             // 
@@ -41,9 +43,9 @@ namespace YoutifyConsole
                 PlaylistId = "FL" + id, // for testing
                 MaxResults = 10
             };
-            service.PlaylistsPage.Search(arg);
+         //   service.PlaylistsPage.Search(arg);
             Utils.LogInfo("First page loaded");
-            WritePlaylists(service.PlaylistsPage.CurrentList);
+            //WritePlaylists(service.PlaylistsPage.CurrentList);
 
             /////////////////////////////////////////
             //

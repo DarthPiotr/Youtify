@@ -17,6 +17,10 @@ namespace YoutifyLib.YouTube
             Title = vid.Snippet.Title;
             Artist = vid.Snippet.ChannelTitle;
         }
+        public YouTubeTrack(PlaylistItem pli)
+        {
+            
+        }
         /// <summary>
         /// YouTube ID of a track
         /// </summary>

@@ -195,35 +195,8 @@ namespace YoutifyLib.YouTube
 
                     foreach (var item in request.Result.Items)
                     {
-                        var vidRequest = Task.Run(() =>
-                        {
-                            var req = Service.Videos.List("snippet");
-                            req.Id = item.Snippet.ResourceId.VideoId;
-                            var res = req.ExecuteAsync();
-                            return res;
-                        });
-
-                        try
-                        {
-                            vidRequest.Wait();
-                        }
-                        catch (Exception ex)
-                        {
-                            Utils.LogError("While trying to fetch video : {1}, exception was thrown at GetPlaylistContents: {0} ", ex.Message, item.Snippet.ResourceId.VideoId);
-                            continue;
-                        }
-                        if (vidRequest.Result.Items.Count > 0)
-                        {
-                            var e = vidRequest.Result.Items[0];
-
-                            playlist.Songs.Add(new YouTubeTrack(e));
-                            Utils.LogInfo("[Video] {0} added", e.Snippet.Title);
-                        }
-                        else
-                        {
-                            Utils.LogWarning("[Video] While trying to fetch video : {0} ({1}), API returned no results!",
-                                item.Snippet.Title, item.Snippet.ResourceId.VideoId);
-                        }
+                        playlist.Songs.Add(new YouTubeTrack(item));
+                        Utils.LogInfo("[Video] {0} added", item.Snippet.Title);
                     }
                     nextToken = request.Result.NextPageToken;
                 }
@@ -285,6 +258,42 @@ namespace YoutifyLib.YouTube
             }
 
             return false;
+        }
+        /// <summary>
+        /// Returns a list of results, matching the query
+        /// </summary>
+        /// <param name="query">String used to search for tracks</param>
+        /// <param name="maxResults">Maximum number of results to return</param>
+        /// <returns>List of matching results</returns>
+        public override List<Track> SearchForTracks(string query, int maxResults = 5)
+        {
+            var list = new List<Track>();
+
+            var request = Task.Run(() => {
+                var req = Service.Search.List("snippet");
+                req.Q = query;
+                req.MaxResults = maxResults;
+                req.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None; // just in case
+                req.Type = "youtube#video";
+                req.Order = SearchResource.ListRequest.OrderEnum.Relevance;
+
+                var res = req.ExecuteAsync();
+
+                return res.Result;
+            });
+
+            request.Wait();
+
+            foreach(var result in request.Result.Items)
+            {
+                list.Add(new YouTubeTrack
+                {
+                    Title = result.Snippet.Title,
+                    ID = result.Id.VideoId
+                });
+            }
+
+            return list;
         }
     }
 }

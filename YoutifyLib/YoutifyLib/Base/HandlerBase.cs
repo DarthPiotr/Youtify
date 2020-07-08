@@ -59,5 +59,7 @@ namespace YoutifyLib
         /// </param>
         /// <returns>If the operation was successful</returns>
         public abstract bool AddTrackToPlaylist(Playlist playlist, Track track, int position = -1);
+
+        public abstract List<Track> SearchForTracks(string query, int maxResults = 5);
     }
 }
