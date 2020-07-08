@@ -1,7 +1,4 @@
 ﻿using Google.Apis.YouTube.v3.Data;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace YoutifyLib.YouTube
 {
@@ -10,16 +7,17 @@ namespace YoutifyLib.YouTube
     /// </summary>
     public class YouTubeTrack : Track
     {
-        public YouTubeTrack() { }
+        public YouTubeTrack() : base() { }
 
-        public YouTubeTrack(Video vid)
+        public YouTubeTrack(Video vid) : base()
         {
-            Title = vid.Snippet.Title;
-            Artist = vid.Snippet.ChannelTitle;
+            Metadata = Algorithm.Algorithm.GetMetadata(vid.Snippet.Title);
+            ID = vid.Id;
         }
-        public YouTubeTrack(PlaylistItem pli)
+        public YouTubeTrack(PlaylistItem pli) : base()
         {
-            
+            Metadata = Algorithm.Algorithm.GetMetadata(pli.Snippet.Title);
+            ID = pli.Snippet.ResourceId.VideoId;
         }
         /// <summary>
         /// YouTube ID of a track

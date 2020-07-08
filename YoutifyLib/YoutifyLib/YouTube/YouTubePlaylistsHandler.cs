@@ -45,6 +45,19 @@ namespace YoutifyLib.YouTube
         ///////////////////////////////////////
         // Public methods
 
+        /// <summary>
+        /// Search for the playlist(s) with specified arguments.
+        /// </summary>
+        /// <param name="arg">Arguments to search with</param>
+        /// <returns>If operation was successfull (Can be true if nothing was found!)</returns>
+        /// 
+        /// To get special playlists on Youtube, use these prefixes to current channel ID.
+        /// !!! Keep in mind, ChannelId is UC[Id]
+        /// Favorites:   FL[Id]
+        /// Likes:       LL[Id]
+        /// Uploads:     Ul[Id]
+        /// History:     HL            (no ChannelId, but OAuth)
+        /// Watch later: WL            (no ChannelId, but OAuth)
         public override bool Search(PlaylistSearchArguments arg)
         {
             Arguments = arg;

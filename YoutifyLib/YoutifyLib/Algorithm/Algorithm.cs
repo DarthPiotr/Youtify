@@ -19,7 +19,7 @@ namespace YoutifyLib.Algorithm
         /// <summary>
         /// Symbols that divide track into artist and title part
         /// </summary>
-        public static List<string> generalDiv       = new List<string> { "-", "–" };
+        public static List<string> generalDiv       = new List<string> { "-", "–", "‒", "|" };
         /// <summary>
         /// Strings that indicates "featuring" part. Without dot at the end.
         /// </summary>
@@ -31,11 +31,11 @@ namespace YoutifyLib.Algorithm
         /// <summary>
         /// Strings that a bracket content that will be ignored
         /// </summary>
-        public static List<string> ignoreBracket    = new List<string> { "official", "lyric", "video", "version", "#" };
+        public static List<string> ignoreBracket    = new List<string> { "official", "lyric", "video", "version", "#", "audio" };
         /// <summary>
         /// Characters that should be removed before processing title
         /// </summary>
-        public static List<string> removeChars      = new List<string> { "\"", "'" };
+        public static List<string> removeStrings     = new List<string> { "\"", "'", "“", "”" };
 
 
         /// <summary>
@@ -57,8 +57,8 @@ namespace YoutifyLib.Algorithm
             // good luck :)
 
             // remove unwanted characters, ie. " '
-            foreach (var c in removeChars)
-                lowtitle.Replace(c, "");
+            foreach (var c in removeStrings)
+                lowtitle = lowtitle.Replace(c, "");
 
             // split the title in two
             foreach (var div in generalDiv)
@@ -108,7 +108,7 @@ namespace YoutifyLib.Algorithm
             // in case there is still some info, divide the rest again
             titleBrackets = new List<string>(titlePart.Split(generalDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries));
             // first part is usually the title
-            meta.Title = titleBrackets[0];
+            meta.Title = titleBrackets[0].Replace(" audio ", " ").Trim();
             // and handle the rest, as if in brackets
             for (i = 1; i < titleBrackets.Count; i++) 
                 HandleBracketsContent(titleBrackets[i].Trim(), meta);
@@ -117,9 +117,14 @@ namespace YoutifyLib.Algorithm
             if (artistPart != "")
             {
                 // in case there is still some info, divide the rest again
-                artistBrackets = new List<string>(artistPart.Split(generalDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries));
+                var divs = generalDiv;
+                divs.AddRange(artistDiv);
+                artistBrackets = new List<string>(artistPart.Split(divs.ToArray(), StringSplitOptions.RemoveEmptyEntries));
                 // first part is usually the title
-                meta.Artist = artistBrackets[0];
+                meta.Artist = artistBrackets[0].Trim();
+                // save the rest just in case
+                artistBrackets.RemoveAt(0);
+                meta.CoArtist = string.Join(",", artistBrackets).Replace(" ,", ",").Trim();
                 // and handle the rest, as if in brackets
                 for (i = 1; i < artistBrackets.Count; i++)
                     HandleBracketsContent(artistBrackets[i].Trim(), meta);

@@ -146,19 +146,6 @@ namespace YoutifyLib.YouTube
 
         }
         /// <summary>
-        /// Search for the playlist(s) with specified arguments.
-        /// </summary>
-        /// <param name="arg">Arguments to search with</param>
-        /// <returns>If operation was successfull (Can be true if nothing was found!)</returns>
-        /// 
-        /// To get special playlists on Youtube, use these prefixes to current channel ID.
-        /// !!! Keep in mind, ChannelId is UC[Id]
-        /// Favorites:   FL[Id]
-        /// Likes:       LL[Id]
-        /// Uploads:     Ul[Id]
-        /// History:     HL            (no ChannelId, but OAuth)
-        /// Watch later: WL            (no ChannelId, but OAuth)
-        /// <summary>
         /// Gets contents of a playlist, using YouTube API.
         /// Sets the Songs property.
         /// </summary>
@@ -267,8 +254,10 @@ namespace YoutifyLib.YouTube
         /// <returns>List of matching results</returns>
         public override List<Track> SearchForTracks(string query, int maxResults = 5)
         {
+            // output list
             var list = new List<Track>();
 
+            // prepare request
             var request = Task.Run(() => {
                 var req = Service.Search.List("snippet");
                 req.Q = query;
@@ -282,13 +271,15 @@ namespace YoutifyLib.YouTube
                 return res.Result;
             });
 
+            // execute till it's done
             request.Wait();
 
+            // add results to the list
             foreach(var result in request.Result.Items)
             {
                 list.Add(new YouTubeTrack
                 {
-                    Title = result.Snippet.Title,
+                    Metadata = Algorithm.Algorithm.GetMetadata(result.Snippet.Title),
                     ID = result.Id.VideoId
                 });
             }

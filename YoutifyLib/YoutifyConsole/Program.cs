@@ -50,8 +50,9 @@ namespace YoutifyConsole
             //
             // create YouTube handler and treat it as a generic one
             //
-            /*YouTubeHandler yth = new YouTubeHandler();
-            HandlerBase service = yth;*/
+            YouTubeHandler yth = new YouTubeHandler();
+            HandlerBase service = yth;
+            Console.WriteLine(((YouTubeTrack)service.SearchForTracks("never gonna give you up")[0]).ID);
 
             // try to call next/prev page beofre Search()
             //service.PlaylistsPage.NextPage(); // works fine
@@ -61,7 +62,7 @@ namespace YoutifyConsole
             // 
             // Fetch first page of playlists
             //
-            /*
+            
             string id = service.GetId();
             var arg = new PlaylistSearchArguments
             {
@@ -72,7 +73,7 @@ namespace YoutifyConsole
             };
             service.PlaylistsPage.Search(arg);
             Utils.LogInfo("First page loaded");
-            WritePlaylists(service.PlaylistsPage.CurrentList);*/
+            WritePlaylists(service.PlaylistsPage.CurrentList);
 
             /////////////////////////////////////////
             //
@@ -87,19 +88,19 @@ namespace YoutifyConsole
             }
             while (num < 1 || num > service.PlaylistsPage.CurrentList.Count);
             num--;*/
-            /*var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
+            var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
             Console.WriteLine("Please wait, while API fetches your videos");
-            var res = service.PlaylistsPage.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
+            var res = service.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
             Console.WriteLine("Was fetching successful? " + res);
             if (res)
-                WritePlaylistContents(pl);*/
-                
+                WritePlaylistContents(pl);//*/
+
 
             /*Console.WriteLine("Attempting to create playlist...");
             Playlist pl = new Playlist("XXX", "samo dobro", "prublic");
             string plid = yth.PlaylistsPage.CreatePlaylist(pl);
             Console.WriteLine("Created a playlist with id: " + plid);*/
-            
+
             /*
             string key;
             while ((key = Console.ReadLine().ToString().ToLower()) != "q")
@@ -145,7 +146,7 @@ namespace YoutifyConsole
             int i = 0;
             foreach (var e in list.Songs)
             {
-                Console.WriteLine("[{2}] {0} by: {1}", e.Title, e.Artist, ++i);
+                Console.WriteLine("[{2}] {0} by: {1}", e.Metadata.Title, e.Metadata.Artist, ++i);
             }
         }
     }

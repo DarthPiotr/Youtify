@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using YoutifyLib.Algorithm;
 
 namespace YoutifyLib
 {
@@ -10,13 +11,13 @@ namespace YoutifyLib
     public class Track
     {
         /// <summary>
-        /// Title of the track
+        /// Stores metadata of the track
         /// </summary>
-        public string Title { get; set; }
-        /// <summary>
-        /// Creator of a track
-        /// </summary>
-        public string Artist { get; set; }
+        public Metadata Metadata { get; set; }
 
+        public Track()
+        {
+            Metadata = new Metadata();
+        }
     }
 }

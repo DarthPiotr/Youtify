@@ -19,6 +19,10 @@ namespace YoutifyLib.Algorithm
         /// </summary>
         public string Artist        { get; set; } = "";
         /// <summary>
+        /// Others artists mentioned in the track of the track
+        /// </summary>
+        public string CoArtist        { get; set; } = "";
+        /// <summary>
         /// Artist of the remix
         /// </summary>
         public string Remix         { get; set; } = "";
@@ -59,6 +63,7 @@ namespace YoutifyLib.Algorithm
             if (!string.IsNullOrEmpty(Mix))
                 search += Mix;
 
+            // finishing touch
             return Utils.RemoveDoubleSpaces(search).TrimEnd();
         }
     }
