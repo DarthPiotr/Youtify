@@ -6,7 +6,8 @@ using System.Text;
 namespace YoutifyLib
 {
     public class Playlist
-    {   
+    {
+        public Playlist() { }
         public Playlist(string title, string description, string status = "public")
         {
             Title = title;
@@ -17,7 +18,7 @@ namespace YoutifyLib
         /// <summary>
         /// The title of the playlist
         /// </summary>
-        public string Title { get; protected set; }
+        public string Title { get; set; }
 
         /// <summary>
         /// Privacy status of the playlist. Available values are: public, private, unlisted.
@@ -26,7 +27,7 @@ namespace YoutifyLib
         public string Status
         {
             get => status;
-            protected set
+            set
             {
                 if (value == "public" || value == "private" || value == "unlisted")
                 {
@@ -39,6 +40,9 @@ namespace YoutifyLib
         }
         private string status;
 
+        /// <summary>ID of Playlist</summary> 
+        public virtual string ID { get; set; }
+
         /// <summary>
         /// List of songs on that playlist
         /// </summary>
@@ -47,26 +51,24 @@ namespace YoutifyLib
         /// <summary>
         /// Description of a playlist
         /// </summary>
-        public string Description { get; protected set; }
+        public string Description { get; set; }
 
         /// <summary>
-        /// Converts generic playlist to Google's YouTube API specific type.
+        /// Converts Playlist to another class instance
         /// </summary>
-        /// <returns></returns>
-        public Google.Apis.YouTube.v3.Data.Playlist GetYouTubePlaylist()
+        /// <typeparam name="T">A type to be converted to. Must inherit from Playlist</typeparam>
+        /// <returns>A new instance of specifed class</returns>
+        public T ToType<T>() where T : Playlist, new() 
         {
-            return new Google.Apis.YouTube.v3.Data.Playlist
+            T newObj = new T
             {
-                Snippet = new PlaylistSnippet
-                {
-                    Title = this.Title,
-                    Description = this.Description
-                },
-                Status = new PlaylistStatus
-                {
-                    PrivacyStatus = this.Status
-                }
+                Songs = this.Songs,
+                ID = this.ID,
+                Title = this.Title,
+                Description = this.Description,
+                Status = this.Status
             };
+            return newObj;
         }
     }
 }

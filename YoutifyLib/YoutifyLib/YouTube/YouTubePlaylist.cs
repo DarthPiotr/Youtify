@@ -10,13 +10,31 @@ namespace YoutifyLib.YouTube
     /// </summary>
     public class YouTubePlaylist : Playlist
     {
+        public YouTubePlaylist() { }
+
         public YouTubePlaylist(string title, string description, string id, string status = "public")
             : base(title, description, status)
         {
             ID = id;
         }
 
-        /// <summary>ID of YouTube Playlist</summary> 
-        public string ID { get; set; }
+        /// <summary>
+        /// Converts generic playlist to Google's YouTube API specific type.
+        /// </summary>
+        /// <returns></returns>
+        public Google.Apis.YouTube.v3.Data.Playlist GetYouTubePlaylist()
+            => new Google.Apis.YouTube.v3.Data.Playlist
+            {
+                Id = this.ID,
+                Snippet = new PlaylistSnippet
+                {
+                    Title = this.Title,
+                    Description = this.Description
+                },
+                Status = new PlaylistStatus
+                {
+                    PrivacyStatus = this.Status
+                }
+            };
     }
 }

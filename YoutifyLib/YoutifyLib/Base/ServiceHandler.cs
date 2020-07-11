@@ -7,9 +7,9 @@ namespace YoutifyLib
     /// <summary>
     /// Base class for API handlers
     /// </summary>
-    public abstract class HandlerBase
+    public abstract class ServiceHandler
     {
-        public HandlerBase()
+        public ServiceHandler()
         {
             Task.Run(ServiceInitAsync).Wait();
         }
@@ -40,26 +40,37 @@ namespace YoutifyLib
 
         /// <summary>
         /// Creates a playlist, using proper API.
+        /// Changes the type of created playlist from generic type to the proper one.
         /// </summary>
         /// <param name="playlist">Playlist to be created</param>
-        /// <returns>Id of created playlist</returns>
-        public abstract string CreatePlaylist(Playlist playlist);
+        /// <returns>Id of created playlist. Null if there were problems</returns>
+        public abstract string CreatePlaylist(ref Playlist playlist);
         /// <summary>
-        /// Gets contents of a playlist, using proper API. Sets the Playlist's Songs property.
+        /// Imports contents of the playlist and sets Songs property
         /// </summary>
-        /// <param name="playlist">Playlist to be fetched</param>
+        /// <param name="playlist">Playlist to be imported</param>
+        /// <param name="onlyMeta">If only metadata should be imported, skipping songs list</param>
         /// <returns>If the operation was successful</returns>
-        public abstract bool GetPlaylistContents(Playlist playlist);
+        public abstract Playlist ImportPlaylist(string playlistId, bool onlyMeta = false);
         /// <summary>
-        /// Adds track to the playlist, using proper API. Updates playlist's Songs property.
+        /// Sychronizes playlist in the service with playlist instance
         /// </summary>
-        /// <param name="playlist">Playlist to be modified</param>
-        /// <param name="track">Track to be added</param>
-        /// <param name="position">Optional position of the track. Leave empty to add at the end of the playlist
-        /// </param>
+        /// <param name="playlist">Playlist to be synchronizes</param>
+        /// <param name="type">Type of synchronization. Overrides must implement all types</param>
         /// <returns>If the operation was successful</returns>
-        public abstract bool AddTrackToPlaylist(Playlist playlist, Track track, int position = -1);
-
+        public abstract bool ExportPlaylist(Playlist playlist, ExportType type);
+        /// <summary>
+        /// Updates playlist snippet and privacy status
+        /// </summary>
+        /// <param name="playlist">Playlist to be updated</param>
+        /// <returns>If the operation was successful</returns>
+        public abstract bool UpdateSnippet(Playlist playlist);
+        /// <summary>
+        /// Asks the service, if it has any tracks matching the query
+        /// </summary>
+        /// <param name="query">Query to be passed</param>
+        /// <param name="maxResults">Maximum number of results</param>
+        /// <returns>List of tracks matching the query</returns>
         public abstract List<Track> SearchForTracks(string query, int maxResults = 5);
     }
 }

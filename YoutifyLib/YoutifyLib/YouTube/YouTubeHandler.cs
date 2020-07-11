@@ -15,7 +15,7 @@ namespace YoutifyLib.YouTube
     /// <summary>
     /// Class responsible for using YouTube API
     /// </summary>
-    public class YouTubeHandler : HandlerBase
+    public class YouTubeHandler : ServiceHandler
     {
         /// <summary>
         /// YouTube API Service
@@ -31,7 +31,7 @@ namespace YoutifyLib.YouTube
         /// Setting up YouTube Service with API key and OAuth
         /// </summary>
         /// <returns>Task to setup YT Service</returns>
-        protected async override Task ServiceInitAsync()
+        protected override async Task ServiceInitAsync()
         {
             Utils.LogInfo("Initializing service...");
             try
@@ -107,10 +107,11 @@ namespace YoutifyLib.YouTube
         }
         /// <summary>
         /// Creates a playlist, using YouTube API.
+        /// Changes the type of created playlist from generic type to the YouTubePlaylist.
         /// </summary>
         /// <param name="playlist">Playlist to be created</param>
-        /// <returns>Id of created playlist</returns>
-        public override string CreatePlaylist(Playlist playlist)
+        /// <returns>Id of created playlist. Null if there were problems</returns>
+        public override string CreatePlaylist(ref Playlist playlist)
         {
             if (string.IsNullOrWhiteSpace(playlist.Title))
             {
@@ -118,133 +119,34 @@ namespace YoutifyLib.YouTube
                 return null;
             }
 
+            var ytpl = playlist.ToType<YouTubePlaylist>();
+            var ytPlaylist = ytpl.GetYouTubePlaylist();
             var request = Task.Run(() =>
-            {
-                try
                 {
-                    var ytPlaylist = ((YouTubePlaylist)playlist).GetYouTubePlaylist();
                     var req = Service.Playlists.Insert(ytPlaylist, "id, snippet, status");
 
                     var res = req.ExecuteAsync();
                     return res;
-                }
-                catch (Exception e)
-                {
-                    Utils.LogError("Inside CreatePlaylist: {0}", e.Message);
-                    return null;
-                }
-            });
-            request.Wait();
+                });
+            try
+            {
+                request.Wait();
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("Inside CreatePlaylist: {0}, {1}", e.Message, e.InnerException);
+                return null;
+            }
 
             if (request.Result == null)
             {
                 Utils.LogError("Playlist creation returned null.");
                 return null;
             }
-
+            ytpl.ID = request.Result.Id;
+            playlist = ytpl;
             return request.Result.Id;
 
-        }
-        /// <summary>
-        /// Gets contents of a playlist, using YouTube API.
-        /// Sets the Songs property.
-        /// </summary>
-        /// <returns>If the operation was successful</returns>
-        public override bool GetPlaylistContents(Playlist playlist)
-        {
-            if (!(playlist is YouTubePlaylist))
-            {
-                Utils.LogError("Tried to fetch contents of playlist that is not compatible with YouTube API.");
-                return false;
-            }
-
-            YouTubePlaylist pl = (YouTubePlaylist)playlist;
-
-            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.ID);
-
-            try
-            {
-                var nextToken = "";
-                while (nextToken != null)
-                {
-                    var request = Task.Run(() =>
-                    {
-                        var req = Service.PlaylistItems.List("snippet");
-                        req.PlaylistId = pl.ID;
-                        req.MaxResults = 20;
-                        req.PageToken = nextToken;
-
-                        var res = req.ExecuteAsync();
-                        return res;
-                    });
-                    request.Wait();
-                    Utils.LogInfo("[Playlist] Fetched {0} tracks", request.Result.Items.Count);
-
-                    foreach (var item in request.Result.Items)
-                    {
-                        playlist.Songs.Add(new YouTubeTrack(item));
-                        Utils.LogInfo("[Video] {0} added", item.Snippet.Title);
-                    }
-                    nextToken = request.Result.NextPageToken;
-                }
-            }
-            catch (Exception e)
-            {
-                Utils.LogError("In GetPlaylistContents: {0}", e.Message);
-                return false;
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Adds track to the playlist, using proper API. Updates playlist's Songs property.
-        /// </summary>
-        /// <param name="playlist">Playlist to be modified</param>
-        /// <param name="track">Track to be added</param>
-        /// <param name="position">Optional position of the track. Leave empty to add at the end of the playlist
-        /// </param>
-        /// <returns>If the operation was successful</returns>
-        public override bool AddTrackToPlaylist(Playlist playlist, Track track, int position = -1)
-        {
-            if (!(playlist is YouTubePlaylist))
-            {
-                Utils.LogError("Tried to operate on playlist that is not compatible with YouTube API.");
-                return false;
-            }
-            if (!(track is YouTubeTrack))
-            {
-                Utils.LogError("Tried to operate on a track that is not compatible with YouTube API.");
-                return false;
-            }
-
-            var pl = (YouTubePlaylist)playlist;
-            var tr = (YouTubeTrack)track;
-
-            var request = Task.Run(() => {
-
-                var pli = tr.ToPlaylistItem(pl.ID);
-                pli.Snippet.PlaylistId = pl.ID;
-                if (position >= 0)
-                    pli.Snippet.Position = position;
-
-                var req = Service.PlaylistItems.Insert(pli, "snippet");
-                var res = req.ExecuteAsync();
-
-                return res.Result;
-            });
-            request.Wait();
-
-            if (request.Result != null)
-            {
-                if (position >= 0)
-                    playlist.Songs.Insert(position, track);
-                else
-                    playlist.Songs.Add(track);
-
-                return true;
-            }
-
-            return false;
         }
         /// <summary>
         /// Returns a list of results, matching the query
@@ -258,7 +160,8 @@ namespace YoutifyLib.YouTube
             var list = new List<Track>();
 
             // prepare request
-            var request = Task.Run(() => {
+            var request = Task.Run(() =>
+            {
                 var req = Service.Search.List("snippet");
                 req.Q = query;
                 req.MaxResults = maxResults;
@@ -275,7 +178,7 @@ namespace YoutifyLib.YouTube
             request.Wait();
 
             // add results to the list
-            foreach(var result in request.Result.Items)
+            foreach (var result in request.Result.Items)
             {
                 list.Add(new YouTubeTrack
                 {
@@ -285,6 +188,208 @@ namespace YoutifyLib.YouTube
             }
 
             return list;
+        }
+        /// <summary>
+        /// Updates Songs property of a playlist
+        /// </summary>
+        /// <param name="playlist">Playlist to be updated</param>
+        /// <param name="onlyMeta">If only metadata should be imported, skipping song list</param>
+        /// <returns>If the operation was successful</returns>
+        public override Playlist ImportPlaylist(string playlistId, bool onlyMeta = false)
+        {
+            YouTubePlaylist pl = new YouTubePlaylist { ID = playlistId };
+
+            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.ID);
+
+            try
+            {
+                var request = Task.Run(() =>
+                {
+                    var req = Service.Playlists.List("snippet, status");
+                    req.Id = pl.ID;
+
+                    var res = req.ExecuteAsync();
+                    return res;
+                });
+                request.Wait();
+
+                pl.Title = request.Result.Items[0].Snippet.Title;
+                pl.Description = request.Result.Items[0].Snippet.Description;
+                pl.Status = request.Result.Items[0].Status.PrivacyStatus;
+
+                if (!onlyMeta)
+                {
+                    var nextToken = "";
+
+                    var request2 = Task.Run(() =>
+                    {
+                        var req = Service.PlaylistItems.List("snippet");
+                        req.PlaylistId = playlistId;
+                        req.MaxResults = 20;
+                        req.PageToken = nextToken;
+
+                        var res = req.ExecuteAsync();
+                        return res;
+                    });
+
+                    while (nextToken != null)
+                    {
+                        request.Wait();
+                        Utils.LogInfo("[Playlist] Fetched {0} tracks", request.Result.Items.Count);
+
+                        foreach (var item in request2.Result.Items)
+                        {
+                            pl.Songs.Add(new YouTubeTrack(item));
+                            Utils.LogInfo("[Video] {0} added", item.Snippet.Title);
+                        }
+                        nextToken = request.Result.NextPageToken;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("In ImportPlaylist: {0}", e.Message);
+                return null;
+            }
+
+            return pl;
+        }
+        /// <summary>
+        /// Synchronizes playlist content on Service with playlist instance
+        /// </summary>
+        /// <param name="playlist">Playlist to be exported</param>
+        /// <param name="type">Type of export</param>
+        /// <returns>If the operation was successful</returns>
+        public override bool ExportPlaylist(Playlist playlist, ExportType type)
+        {
+            var pl = playlist.ToType<YouTubePlaylist>();
+
+
+            switch (type)
+            {
+                case ExportType.AddAll:
+                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.ID);
+
+                case ExportType.AddDistinct:
+                    var toSubmit = Utils.SongsToIdList(playlist.Songs);
+                    var imported = ImportPlaylist(playlist.ID);
+                    var current = Utils.SongsToIdList(imported.Songs);
+                    
+                    foreach (var e in current)
+                        toSubmit.RemoveAll(x => { return x == e; });
+
+                    return ExportList(toSubmit, playlist.ID);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        /// <summary>
+        /// Adds every song from Songs property to playlist
+        /// </summary>
+        /// <param name="playlist">Playlist to be exported</param>
+        /// <returns>if the operation was successful</returns>
+        private bool ExportList(YouTubePlaylist playlist)
+        {
+            foreach (YouTubeTrack song in playlist.Songs)
+            {
+                try
+                {
+                    var request = Task.Run(() =>
+                    {
+
+                        var pli = song.ToPlaylistItem(playlist.ID);
+                        pli.Snippet.PlaylistId = playlist.ID;
+
+                        var req = Service.PlaylistItems.Insert(pli, "snippet");
+                        var res = req.ExecuteAsync();
+
+                        return res.Result;
+                    });
+                    request.Wait();
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError("An error occured while exporting tracks. {0}, {1}", e.Message, e.InnerException);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Adds every id to the playlist
+        /// </summary>
+        /// <param name="videoIds">list of ids to add</param>
+        /// <param name="playlistId">id of a playlist</param>
+        /// <returns>if the operation was successful</returns>
+        private bool ExportList(List<string> videoIds, string playlistId)
+        {
+            foreach (var id in videoIds)
+            {
+                try
+                {
+                    var request = Task.Run(() =>
+                    {
+
+                        var pli = new PlaylistItem
+                        {
+                            Snippet = new PlaylistItemSnippet
+                            {
+                                ResourceId = new ResourceId
+                                {
+                                    Kind = "youtube#video",
+                                    VideoId = id,
+                                    PlaylistId = playlistId
+                                }
+                            }
+                        };
+                        pli.Snippet.PlaylistId = playlistId;
+
+                        var req = Service.PlaylistItems.Insert(pli, "snippet");
+                        var res = req.ExecuteAsync();
+
+                        return res.Result;
+                    });
+                    request.Wait();
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError("An error occured while exporting tracks. {0}, {1}", e.Message, e.InnerException);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Updates snippet, that is title, description and privacy status of playlist
+        /// </summary>
+        /// <param name="playlist">Playlist with snippet to update</param>
+        /// <returns>If the operation was successful</returns>
+        public override bool UpdateSnippet(Playlist playlist)
+        {
+            try
+            {
+                var request = Task.Run(() =>
+                {
+
+                    var pl = playlist.ToType<YouTubePlaylist>().GetYouTubePlaylist();
+
+                    var req = Service.Playlists.Update(pl, "snippet, status");
+
+                    var res = req.ExecuteAsync();
+
+                    return res.Result;
+                });
+                request.Wait();
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("An error occured while updating snippet. {0}, {1}", e.Message, e.InnerException);
+                return false;
+            }
+
+            return true;
         }
     }
 }

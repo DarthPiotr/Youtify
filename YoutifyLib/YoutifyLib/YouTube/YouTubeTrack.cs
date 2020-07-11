@@ -19,11 +19,12 @@ namespace YoutifyLib.YouTube
             Metadata = Algorithm.Algorithm.GetMetadata(pli.Snippet.Title);
             ID = pli.Snippet.ResourceId.VideoId;
         }
+        
         /// <summary>
-        /// YouTube ID of a track
+        /// Creates YouTube API's PlaylistItem instance from Track
         /// </summary>
-        public string ID { get; set; }
-
+        /// <param name="playlistId">Id of a playlist that track will be part of</param>
+        /// <returns>instance of YT API's PlaylistItem</returns>
         public Google.Apis.YouTube.v3.Data.PlaylistItem ToPlaylistItem(string playlistId)
         {
             return new PlaylistItem {

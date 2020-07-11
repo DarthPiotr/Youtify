@@ -14,6 +14,10 @@ namespace YoutifyLib
         /// Stores metadata of the track
         /// </summary>
         public Metadata Metadata { get; set; }
+        /// <summary>
+        /// ID of a track
+        /// </summary>
+        public virtual string ID { get; set; }
 
         public Track()
         {

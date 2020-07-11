@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace YoutifyLib
@@ -32,6 +33,22 @@ namespace YoutifyLib
         {
             Regex regex = new Regex("[ ]{2,}", RegexOptions.None);
             return regex.Replace(input, " ");
+        }
+
+        //////////////////////////////////
+        //    Other
+
+        /// <summary>
+        /// Returns a list of tracks' ids, instead of all metadata
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> SongsToIdList(List<Track> songs)
+        {
+            List<string> list = new List<string>();
+            foreach (var ytt in songs)
+                list.Add(ytt.ID);
+
+            return list;
         }
     }
 }

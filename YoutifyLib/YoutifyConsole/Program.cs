@@ -18,6 +18,36 @@ namespace YoutifyConsole
         {
             Console.WriteLine("This is a test");
 
+            ///////////////////////////////////////////
+            //
+            //  Creating/Importing Playlist and adding songs
+            //
+
+            // init service and treat like generic one
+            YouTubeHandler yth = new YouTubeHandler();
+            ServiceHandler service = yth;
+
+            /////////////////////////////
+            // Creating a new playlist
+            
+            // var x = new Playlist("Title","Description");
+            // service.CreatePlaylist(ref x);
+
+            var x = service.ImportPlaylist("PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX", true);
+            
+            x.Songs.Add(service.SearchForTracks("never gonna give you up")[0]);
+            x.Songs.Add(service.SearchForTracks("blah blah blah Armin")[0]);
+            x.Songs.Add(service.SearchForTracks("no no no elybeatmaker")[0]);
+
+            service.ExportPlaylist(x, ExportType.AddDistinct);
+
+            x.Status = "unlisted";
+            x.Title = "Yay, a new title!";
+            x.Description = "Yay, a new description!";
+
+            service.UpdateSnippet(x);            
+
+            /*
             // feat
             Console.WriteLine(Algorithm.GetMetadata("Calvin Harris - Feels (Official Video) ft. Pharrell Williams, Katy Perry, Big Sean").GetSearchString());
             // edit / remix
@@ -50,8 +80,7 @@ namespace YoutifyConsole
             //
             // create YouTube handler and treat it as a generic one
             //
-            YouTubeHandler yth = new YouTubeHandler();
-            HandlerBase service = yth;
+            
             Console.WriteLine(((YouTubeTrack)service.SearchForTracks("never gonna give you up")[0]).ID);
 
             // try to call next/prev page beofre Search()
@@ -87,14 +116,17 @@ namespace YoutifyConsole
                 num = Convert.ToInt32(Console.ReadLine());
             }
             while (num < 1 || num > service.PlaylistsPage.CurrentList.Count);
-            num--;*/
+            num--;*//*
             var pl = new YouTubePlaylist("yes", "yes", "PLQQAs5duqv7I1VKNYAVgj6oN90vWsHnzF");
             Console.WriteLine("Please wait, while API fetches your videos");
             var res = service.GetPlaylistContents(pl);// service.PlaylistsPage.CurrentList[num]);
-            Console.WriteLine("Was fetching successful? " + res);
-            if (res)
-                WritePlaylistContents(pl);//*/
+            pl.Songs = res;
+            Console.WriteLine("Was fetching successful? " + (res != null));
+            if (res != null)
+                WritePlaylistContents(pl);//*//*
 
+            pl.Songs.Add(new YouTubeTrack() { Metadata = new Metadata() { Title = "test", Artist = "atest" } });
+            service.ExportPlaylist(pl, ExportType.AddDistinct);
 
             /*Console.WriteLine("Attempting to create playlist...");
             Playlist pl = new Playlist("XXX", "samo dobro", "prublic");
@@ -146,7 +178,7 @@ namespace YoutifyConsole
             int i = 0;
             foreach (var e in list.Songs)
             {
-                Console.WriteLine("[{2}] {0} by: {1}", e.Metadata.Title, e.Metadata.Artist, ++i);
+                Console.WriteLine("[{2}] {0}", e.Metadata.GetSearchString(), ++i);
             }
         }
     }
