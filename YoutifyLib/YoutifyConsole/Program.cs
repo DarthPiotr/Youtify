@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using YoutifyLib;
+using YoutifyLib.Spotify;
 using YoutifyLib.YouTube;
 using YoutifyLib.Algorithm;
 
@@ -24,28 +25,28 @@ namespace YoutifyConsole
             //
 
             // init service and treat like generic one
-            YouTubeHandler yth = new YouTubeHandler();
-            ServiceHandler service = yth;
+            var serv = new SpotifyHandler();
+            ServiceHandler service = serv;
 
             /////////////////////////////
             // Creating a new playlist
-            
+
             // var x = new Playlist("Title","Description");
             // service.CreatePlaylist(ref x);
 
-            var x = service.ImportPlaylist("PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX", true);
+            var x = service.ImportPlaylist("1IsDhKJ9wQfZJchm2PRMuX");
             
             x.Songs.Add(service.SearchForTracks("never gonna give you up")[0]);
             x.Songs.Add(service.SearchForTracks("blah blah blah Armin")[0]);
             x.Songs.Add(service.SearchForTracks("no no no elybeatmaker")[0]);
 
-            service.ExportPlaylist(x, ExportType.AddDistinct);
+            //service.ExportPlaylist(x, ExportType.AddDistinct);
 
             x.Status = "unlisted";
             x.Title = "Yay, a new title!";
             x.Description = "Yay, a new description!";
 
-            service.UpdateSnippet(x);            
+            //service.UpdateSnippet(x);            
 
             /*
             // feat

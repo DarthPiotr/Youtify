@@ -5,7 +5,6 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +27,7 @@ namespace YoutifyLib.YouTube
         }
 
         /// <summary>
-        /// Setting up YouTube Service with API key and OAuth
+        /// Setting up YouTube Service with API key and OAuth. Used in constructor.
         /// </summary>
         /// <returns>Task to setup YT Service</returns>
         protected override async Task ServiceInitAsync()
@@ -54,7 +53,7 @@ namespace YoutifyLib.YouTube
                 // Google YouTube API Service
                 Service = new YouTubeService(new BaseClientService.Initializer()
                 {
-                    ApiKey = APIKey.YTKey,
+                    ApiKey = Secrets.YTKey,
                     HttpClientInitializer = credential,
                     ApplicationName = this.GetType().ToString()
                 });
@@ -62,9 +61,9 @@ namespace YoutifyLib.YouTube
             catch (Exception e)
             {
                 // TODO: Proper exception handling
-                Debug.WriteLine(String.Format("[ERROR] {0}", e.Message));
+                Utils.LogError(e.Message);
             }
-            Debug.WriteLine("Initializing service done!");
+            Utils.LogInfo("Initializing service done!");
         }
         /// <summary>
         /// Returns id of a channel, without UC prefix.

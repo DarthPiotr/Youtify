@@ -10,7 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.46.0.1995" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.47.0.2008" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SpotifyAPI.Web">
+      <HintPath>..\packages\SpotifyAPI.Web.6.0.0-beta.9\lib\netstandard2.0\SpotifyAPI.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="SpotifyAPI.Web.Auth">
+      <HintPath>..\packages\SpotifyAPI.Web.Auth.6.0.0-beta.9\lib\netstandard2.0\SpotifyAPI.Web.Auth.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
