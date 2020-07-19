@@ -15,7 +15,7 @@ namespace YoutifyLib.YouTube
         public YouTubePlaylist(string title, string description, string id, string status = "public")
             : base(title, description, status)
         {
-            ID = id;
+            Id = id;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace YoutifyLib.YouTube
         public Google.Apis.YouTube.v3.Data.Playlist GetYouTubePlaylist()
             => new Google.Apis.YouTube.v3.Data.Playlist
             {
-                Id = this.ID,
+                Id = this.Id,
                 Snippet = new PlaylistSnippet
                 {
                     Title = this.Title,

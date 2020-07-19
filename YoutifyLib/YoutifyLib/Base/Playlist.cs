@@ -41,7 +41,7 @@ namespace YoutifyLib
         private string status;
 
         /// <summary>ID of Playlist</summary> 
-        public virtual string ID { get; set; }
+        public virtual string Id { get; set; }
 
         /// <summary>
         /// List of songs on that playlist
@@ -63,7 +63,7 @@ namespace YoutifyLib
             T newObj = new T
             {
                 Songs = this.Songs,
-                ID = this.ID,
+                Id = this.Id,
                 Title = this.Title,
                 Description = this.Description,
                 Status = this.Status

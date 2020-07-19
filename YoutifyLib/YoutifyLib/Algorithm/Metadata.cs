@@ -34,17 +34,17 @@ namespace YoutifyLib.Algorithm
         /// Name of a mix i.e. club mix
         /// </summary>
         public string Mix           { get; set; } = "";
+        /// <summary>
+        /// Name of a edit i.e. radio edit
+        /// </summary>
+        public string Edit          { get; set; } = "";
 
         public string GetSearchString(bool includeExtraTitle = true)
         {
             string search = "";
             // Remix artist is prefered to original artist
             if (string.IsNullOrEmpty(Remix))
-            {
-                string[] art = Artist?.Split(Algorithm.artistDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries);
-                if (art?.Length > 0)
-                    search += art[0] + " ";
-            }
+                search += Artist + " ";
             else
             {
                 var rem = Remix.Replace("remix", "").Split(Algorithm.artistDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -62,6 +62,10 @@ namespace YoutifyLib.Algorithm
             // add mix info
             if (!string.IsNullOrEmpty(Mix))
                 search += Mix;
+
+            // add edit info
+            if (!string.IsNullOrEmpty(Edit))
+                search += Edit;
 
             // finishing touch
             return Utils.RemoveDoubleSpaces(search).TrimEnd();

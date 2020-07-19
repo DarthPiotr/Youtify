@@ -21,8 +21,10 @@ namespace YoutifyLib.YouTube
         /// </summary>
         private YouTubeService Service { get; set; }
 
-        public YouTubeHandler() : base()
+        public YouTubeHandler()
         {
+            if (Service == null)
+                Task.Run(ServiceInitAsync).Wait();
             PlaylistsPage = new YouTubePlaylistsHandler(Service);
         }
 
@@ -142,7 +144,7 @@ namespace YoutifyLib.YouTube
                 Utils.LogError("Playlist creation returned null.");
                 return null;
             }
-            ytpl.ID = request.Result.Id;
+            ytpl.Id = request.Result.Id;
             playlist = ytpl;
             return request.Result.Id;
 
@@ -189,23 +191,23 @@ namespace YoutifyLib.YouTube
             return list;
         }
         /// <summary>
-        /// Updates Songs property of a playlist
+        /// Returns a playlist with all tracks (if specified) and metadata
         /// </summary>
-        /// <param name="playlist">Playlist to be updated</param>
+        /// <param name="playlistId">Id of a playlist to be imported</param>
         /// <param name="onlyMeta">If only metadata should be imported, skipping song list</param>
-        /// <returns>If the operation was successful</returns>
+        /// <returns>The requested playlist</returns>
         public override Playlist ImportPlaylist(string playlistId, bool onlyMeta = false)
         {
-            YouTubePlaylist pl = new YouTubePlaylist { ID = playlistId };
+            YouTubePlaylist pl = new YouTubePlaylist { Id = playlistId };
 
-            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.ID);
+            Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.Id);
 
             try
             {
                 var request = Task.Run(() =>
                 {
                     var req = Service.Playlists.List("snippet, status");
-                    req.Id = pl.ID;
+                    req.Id = pl.Id;
 
                     var res = req.ExecuteAsync();
                     return res;
@@ -267,17 +269,17 @@ namespace YoutifyLib.YouTube
             switch (type)
             {
                 case ExportType.AddAll:
-                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.ID);
+                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
 
                 case ExportType.AddDistinct:
                     var toSubmit = Utils.SongsToIdList(playlist.Songs);
-                    var imported = ImportPlaylist(playlist.ID);
+                    var imported = ImportPlaylist(playlist.Id);
                     var current = Utils.SongsToIdList(imported.Songs);
                     
                     foreach (var e in current)
                         toSubmit.RemoveAll(x => { return x == e; });
 
-                    return ExportList(toSubmit, playlist.ID);
+                    return ExportList(toSubmit, playlist.Id);
                 default:
                     throw new NotImplementedException();
             }
@@ -296,8 +298,8 @@ namespace YoutifyLib.YouTube
                     var request = Task.Run(() =>
                     {
 
-                        var pli = song.ToPlaylistItem(playlist.ID);
-                        pli.Snippet.PlaylistId = playlist.ID;
+                        var pli = song.ToPlaylistItem(playlist.Id);
+                        pli.Snippet.PlaylistId = playlist.Id;
 
                         var req = Service.PlaylistItems.Insert(pli, "snippet");
                         var res = req.ExecuteAsync();

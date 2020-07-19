@@ -11,7 +11,7 @@ namespace YoutifyLib.Spotify
         public SpotifyPlaylist(string title, string description, string id, string status = "public")
             : base(title, description, status)
         {
-            ID = id;
+            Id = id;
         }
     }
 }

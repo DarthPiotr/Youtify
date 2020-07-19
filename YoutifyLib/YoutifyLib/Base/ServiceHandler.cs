@@ -13,7 +13,7 @@ namespace YoutifyLib
 
         public ServiceHandler()
         {
-            Task.Run(ServiceInitAsync).Wait();
+            //Task.Run(ServiceInitAsync).Wait();
         }
 
         /// <summary>

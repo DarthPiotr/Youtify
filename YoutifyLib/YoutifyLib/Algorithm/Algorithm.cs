@@ -132,8 +132,52 @@ namespace YoutifyLib.Algorithm
 
             return meta;
         }
-        
-        
+
+        /// <summary>
+        /// Returns metedata extracted from a Spotify title. Data can be not 100% accurate.
+        /// </summary>
+        /// <param name="title">Title to extract data from</param>
+        /// <returns>Extracted metadata</returns>
+        public static Metadata GetMetadataNoArtist(string title)
+        {
+            // init variables
+            int i;                              // iterator for various loops
+            string lowtitle = title.ToLower();  // copy title in lowercase
+            Metadata meta = new Metadata();     // metadata to output
+
+            // remove unwanted characters, ie. " '
+            foreach (var c in removeStrings)
+                lowtitle = lowtitle.Replace(c, "");
+
+            // of course there can be brackets in a title...
+            var brackets = ExtractBracketContents(ref lowtitle);
+
+            for (i = 0; i < brackets.Count; i++)
+            {
+                bool wasAdded = HandleBracketsContent(brackets[i], meta);
+
+                if (!wasAdded && i == 0)
+                    meta.TitleExtra = brackets[i].Trim();
+            }
+
+            // split the string using predefined separators
+            var parts = lowtitle.Split(generalDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            // on Spotify, the title is always the first part (almost I guess, but I don't know any track like that)
+            meta.Title = parts[0].TrimEnd();
+
+            // process the rest of the title
+            for(i = 1; i < parts.Length; i++)
+            {
+                bool wasAdded = HandleBracketsContent(parts[i], meta);
+
+                // save extra title info for the first title bracket contents
+                if (string.IsNullOrEmpty(meta.TitleExtra) && !wasAdded && i == 1)
+                    meta.TitleExtra = parts[i].Trim();
+            }
+
+            return meta;
+        }
+
         /// <summary>
         /// Used to extract "featuring" part of the video. This part will be removed from the snippet.
         /// </summary>
@@ -301,6 +345,11 @@ namespace YoutifyLib.Algorithm
             else if (content.Contains("mix"))
             {
                 meta.Mix = content;
+                return true;
+            }
+            else if (content.Contains("edit"))
+            {
+                meta.Edit = content;
                 return true;
             }
 

@@ -11,7 +11,7 @@ namespace YoutifyLib.Spotify
         {
             ID = track.Id;
 
-            Metadata.Title = track.Name;
+            Metadata = Algorithm.Algorithm.GetMetadataNoArtist(track.Name);
             if (track.Artists.Count > 0)
             {
                 Metadata.Artist = track.Artists[0].Name;
