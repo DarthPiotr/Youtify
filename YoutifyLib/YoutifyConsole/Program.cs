@@ -28,18 +28,15 @@ namespace YoutifyConsole
             var serv = new SpotifyHandler();
             ServiceHandler service = serv;
 
-            Console.WriteLine("Test");
+        /////////////////////////////
+        // Creating a new playlist
 
-            /////////////////////////////
-            // Creating a new playlist
+        //var p = new Playlist("Testing Playlists", "Description");
+        //service.CreatePlaylist(ref p);
 
-            var x = new Playlist("Testing Playlists","Description");
-
-            Console.ReadKey();
-            service.CreatePlaylist(ref x);
-            
-
-            //var x = service.ImportPlaylist("1IsDhKJ9wQfZJchm2PRMuX");
+          var x = service.ImportPlaylist("0Z55nJHwYrK9qYNDfLjFxu");
+            x.Description = "At least for me. I hope for you too!";
+            service.UpdateSnippet(x);
             
             x.Songs.Add(service.SearchForTracks("never gonna give you up")[0]);
 

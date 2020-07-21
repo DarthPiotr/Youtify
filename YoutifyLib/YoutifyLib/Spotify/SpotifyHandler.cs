@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace YoutifyLib.Spotify
 {
@@ -25,6 +26,10 @@ namespace YoutifyLib.Spotify
         /// Embedded OAuth server to get response for authorization
         /// </summary>
         private static EmbedIOAuthServer _server;
+        /// <summary>
+        /// Waits for Spotify event to recieve athorization and continue with the initialization
+        /// </summary>
+        private static AutoResetEvent are = new AutoResetEvent(false);
 
         public SpotifyHandler()
         {
@@ -126,14 +131,39 @@ namespace YoutifyLib.Spotify
             return list;
         }
 
+        /// <summary>
+        /// Updates snippet, that is title, description and privacy status of playlist
+        /// </summary>
+        /// <param name="playlist">Playlist with snippet to update</param>
+        /// <returns>If the operation was successful</returns>
         public override bool UpdateSnippet(Playlist playlist)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var details = new PlaylistChangeDetailsRequest
+                {
+                    Description = playlist.Description,
+                    Name = playlist.Title,
+                    Public = playlist.Status == "public"
+                };
+
+                var req = Service.Playlists.ChangeDetails(playlist.Id, details);
+                req.Wait();
+
+                return req.Result;
+            }
+            catch(Exception e)
+            {
+                Utils.LogError("While updating snippet: {0}, {1}", e.Message, e.InnerException.Message);
+                return false;
+            }
         }
         /// <summary>
         /// Setting up Spotify Service with API key and OAuth. Used in constructor.
         /// </summary>
         /// <returns>Task to setup Spotify Service</returns>
+        //  From Spotify API docs:
+        //  https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Docs/docs/authorization_code.md
         protected override async Task ServiceInitAsync()
         {
             Utils.LogInfo("Initializing Spotify service...");
@@ -157,12 +187,27 @@ namespace YoutifyLib.Spotify
                         Scopes.PlaylistReadPrivate }
                 };
                 BrowserUtil.Open(request.ToUri());
+                Utils.LogInfo("Waiting for Authorization Token...");
+                are.WaitOne();
+                Utils.LogInfo("Auth Token Recieved!");
+                try
+                {
+                    var req = Service.UserProfile.Current();
+                    req.Wait();
+                    UserId = req.Result.Id;
+
+                    Utils.LogInfo("User Id is ready to use!");
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError("While getting user ID: {0}, {1}", e.Message, e.InnerException.Message);
+                }
             }
             catch (Exception e)
             {
                 Utils.LogError("While initializing Spotify: {0}, {1}", e.Message, e.InnerException.Message);
             }
-            Utils.LogInfo("Initializing Spotify in progress...");
+            Utils.LogInfo("Initializing Spotify done!");
         }
         /// <summary>
         /// Handler for OAuth server, when authorization code is recieved, finish setting up the Service property
@@ -182,19 +227,8 @@ namespace YoutifyLib.Spotify
             Service = new SpotifyClient(tokenResponse.AccessToken);
             // TODO: save token?
 
-            Utils.LogInfo("Getting current user Id...");
-            try
-            {
-                var request = Service.UserProfile.Current();
-                request.Wait();
-                UserId = request.Result.Id;
-
-                Utils.LogInfo("User Id is ready to use!");
-            }
-            catch (Exception e)
-            {
-                Utils.LogError("While getting user ID: {0}, {1}", e.Message, e.InnerException.Message);
-            }
+            // Continue initialization
+            are.Set();
         }
     }
 }
