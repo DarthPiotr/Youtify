@@ -280,9 +280,11 @@ namespace YoutifyLib.YouTube
                         toSubmit.RemoveAll(x => { return x == e; });
 
                     return ExportList(toSubmit, playlist.Id);
-                default:
-                    throw new NotImplementedException();
+                case ExportType.Override:
+                    RemoveFromPlaylist(playlist);
+                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
             }
+            return false;
         }
         /// <summary>
         /// Adds every song from Songs property to playlist
@@ -375,9 +377,7 @@ namespace YoutifyLib.YouTube
                 {
 
                     var pl = playlist.ToType<YouTubePlaylist>().GetYouTubePlaylist();
-
                     var req = Service.Playlists.Update(pl, "snippet, status");
-
                     var res = req.ExecuteAsync();
 
                     return res.Result;
@@ -387,6 +387,60 @@ namespace YoutifyLib.YouTube
             catch (Exception e)
             {
                 Utils.LogError("An error occured while updating snippet. {0}, {1}", e.Message, e.InnerException);
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Removes specifed tracks from playlist
+        /// </summary>
+        /// <param name="playlist">Playlist to work on</param>
+        /// <param name="tracks">List of tracks to remove</param>
+        /// <returns>If the operation was successful</returns>
+        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> tracks = null)
+        {
+            // get up-to-date contents of the playlist
+            var list = ImportPlaylist(playlist.Id).Songs ;
+
+            // leave on the list only elements to remove
+            if (tracks != null)
+            {
+                bool found;
+                foreach (YouTubeTrack imported in list.ToArray())
+                {
+                    found = false;
+                    foreach (YouTubeTrack track in tracks)
+                    {
+                        if (track.ID == imported.ID)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        list.RemoveAll(x => imported == x);
+                }
+            }
+            // then remove what was found
+            try
+            {
+                Task<string> request;
+                foreach (YouTubeTrack track in list)
+                {
+                    request = Task.Run(() => {
+                        var req = Service.PlaylistItems.Delete(track.PlaylistItemId);
+                        var res = req.ExecuteAsync();
+
+                        return res.Result;
+                    });
+                    request.Wait();
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While trying to remove from playlist: {0}, {1}", e.Message, e.InnerException.Message);
                 return false;
             }
 

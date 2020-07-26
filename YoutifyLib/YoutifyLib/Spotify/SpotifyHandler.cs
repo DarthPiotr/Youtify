@@ -230,5 +230,10 @@ namespace YoutifyLib.Spotify
             // Continue initialization
             are.Set();
         }
+
+        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> track)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

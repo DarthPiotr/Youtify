@@ -7,7 +7,9 @@ namespace YoutifyLib
 {
     public class Playlist
     {
-        public Playlist() { }
+        public Playlist() {
+            Status = "public";
+        }
         public Playlist(string title, string description, string status = "public")
         {
             Title = title;

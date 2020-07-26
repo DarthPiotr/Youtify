@@ -25,27 +25,34 @@ namespace YoutifyConsole
             //
 
             // init service and treat like generic one
-            var serv = new SpotifyHandler();
+            var serv = new YouTubeHandler();
             ServiceHandler service = serv;
 
-        /////////////////////////////
-        // Creating a new playlist
+            /////////////////////////////
+            // Creating a new playlist
 
-        //var p = new Playlist("Testing Playlists", "Description");
-        //service.CreatePlaylist(ref p);
+            //var p = new Playlist("Testing Playlists", "Description");
+            //service.CreatePlaylist(ref p);
 
-          var x = service.ImportPlaylist("0Z55nJHwYrK9qYNDfLjFxu");
-            x.Description = "At least for me. I hope for you too!";
-            service.UpdateSnippet(x);
+            var x = new Playlist() { Id = "PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX" };
+            //service.ImportPlaylist("PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX");
+            /*List<Track> toRemove = new List<Track> {
+                service.SearchForTracks("blah blah blah Armin")[0],
+                service.SearchForTracks("never gonna give you up")[0]
+            };
+            service.RemoveFromPlaylist(x, toRemove);*/
+
             
-            x.Songs.Add(service.SearchForTracks("never gonna give you up")[0]);
-
-            Console.WriteLine("Lolxd it works");
-
+            //x.Description = "At least for me. I hope for you too!";
+            //service.UpdateSnippet(x);
+            
+            x.Songs.Add(service.SearchForTracks("discopolis 2.0")[0]);
             x.Songs.Add(service.SearchForTracks("blah blah blah Armin")[0]);
+            x.Songs.Add(service.SearchForTracks("here with me ruben")[0]);
+            x.Songs.Add(service.SearchForTracks("911 timmy trumpet")[0]);
             // x.Songs.Add(service.SearchForTracks("no no no elybeatmaker")[0]);
 
-            //service.ExportPlaylist(x, ExportType.AddDistinct);
+            service.ExportPlaylist(x, ExportType.Override);
 
             x.Status = "private";
             x.Title = "Yay, a new title!";

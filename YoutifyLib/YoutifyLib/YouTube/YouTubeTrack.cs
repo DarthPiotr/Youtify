@@ -7,6 +7,8 @@ namespace YoutifyLib.YouTube
     /// </summary>
     public class YouTubeTrack : Track
     {
+        public string PlaylistItemId { get; set; }
+
         public YouTubeTrack() : base() { }
 
         public YouTubeTrack(Video vid) : base()
@@ -18,6 +20,7 @@ namespace YoutifyLib.YouTube
         {
             Metadata = Algorithm.Algorithm.GetMetadata(pli.Snippet.Title);
             ID = pli.Snippet.ResourceId.VideoId;
+            PlaylistItemId = pli.Id;
         }
         
         /// <summary>

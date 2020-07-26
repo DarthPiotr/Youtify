@@ -68,6 +68,13 @@ namespace YoutifyLib
         /// <returns>If the operation was successful</returns>
         public abstract bool UpdateSnippet(Playlist playlist);
         /// <summary>
+        /// Removes the specified tracks from playlist
+        /// </summary>
+        /// <param name="playlist">Playlist that will be modified</param>
+        /// <param name="tracks">List of track to remove</param>
+        /// <returns>If the operation was successful</returns>
+        public abstract bool RemoveFromPlaylist(Playlist playlist, List<Track> track);
+        /// <summary>
         /// Asks the service, if it has any tracks matching the query
         /// </summary>
         /// <param name="query">Query to be passed</param>
