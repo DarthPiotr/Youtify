@@ -25,22 +25,24 @@ namespace YoutifyConsole
             //
 
             // init service and treat like generic one
-            var serv = new YouTubeHandler();
+            var serv = new SpotifyHandler();
             ServiceHandler service = serv;
 
-            /////////////////////////////
-            // Creating a new playlist
+        /////////////////////////////
+        // Creating a new playlist
 
-            //var p = new Playlist("Testing Playlists", "Description");
-            //service.CreatePlaylist(ref p);
-
-            var x = new Playlist() { Id = "PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX" };
+        //var x = new Playlist("Testing Playlists", "Description");
+        //service.CreatePlaylist(ref x);
+        //spotify: playlist: 1WuJyQz1yO8YugBXmmQ1Hb
+          var x = new Playlist() { Id = "1WuJyQz1yO8YugBXmmQ1Hb" };
             //service.ImportPlaylist("PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX");
-            /*List<Track> toRemove = new List<Track> {
+            List<Track> toRemove = new List<Track> {
                 service.SearchForTracks("blah blah blah Armin")[0],
-                service.SearchForTracks("never gonna give you up")[0]
+                service.SearchForTracks("here she comes again")[0]
             };
-            service.RemoveFromPlaylist(x, toRemove);*/
+            service.RemoveFromPlaylist(x, toRemove);
+
+
 
             
             //x.Description = "At least for me. I hope for you too!";

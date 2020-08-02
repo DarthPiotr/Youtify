@@ -130,7 +130,6 @@ namespace YoutifyLib.Spotify
 
             return list;
         }
-
         /// <summary>
         /// Updates snippet, that is title, description and privacy status of playlist
         /// </summary>
@@ -230,10 +229,29 @@ namespace YoutifyLib.Spotify
             // Continue initialization
             are.Set();
         }
-
-        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> track)
+        /// <summary>
+        /// Removes the specified tracks from playlist
+        /// </summary>
+        /// <param name="playlist">Playlist that will be modified</param>
+        /// <param name="tracks">List of track to remove</param>
+        /// <returns>If the operation was successful</returns>
+        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> track = null)
         {
-            throw new NotImplementedException();
+            var priri = new List<PlaylistRemoveItemsRequest.Item>();
+            foreach(SpotifyTrack st in track)
+            {
+                priri.Add(
+                    new PlaylistRemoveItemsRequest.Item()
+                        { Uri = "spotify:track:" + st.ID }
+                    );
+            }
+
+            var prir = new PlaylistRemoveItemsRequest(priri);
+            var request = Service.Playlists.RemoveItems(playlist.Id, prir);
+
+            request.Wait();
+
+            return request.Result != null;
         }
     }
 }
