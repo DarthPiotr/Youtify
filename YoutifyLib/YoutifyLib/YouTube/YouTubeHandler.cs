@@ -73,6 +73,7 @@ namespace YoutifyLib.YouTube
         /// <param name="channelName">A channel name to resolve.
         /// Leave empty or null to resolve current channel (OAuth)</param>
         /// <returns>Id of a channel, without UC prefix</returns>
+        [Obsolete("This feature is not supported by Spotify API", false)]
         public override string GetId(string channelName = null)
         {
             if (channelId != null &&
@@ -263,9 +264,6 @@ namespace YoutifyLib.YouTube
         /// <returns>If the operation was successful</returns>
         public override bool ExportPlaylist(Playlist playlist, ExportType type)
         {
-            var pl = playlist.ToType<YouTubePlaylist>();
-
-
             switch (type)
             {
                 case ExportType.AddAll:
@@ -420,7 +418,7 @@ namespace YoutifyLib.YouTube
                     }
 
                     if (!found)
-                        list.RemoveAll(x => imported == x);
+                        list.RemoveAll(e => imported == e);
                 }
             }
             // then remove what was found

@@ -33,6 +33,7 @@ namespace YoutifyLib
         /// <param name="channelName">A channel name to resolve.
         /// Leave empty or null to resolve current channel (OAuth)</param>
         /// <returns>Id of a channel/user</returns>
+        [Obsolete("This feature is not supported by Spotify API", false)]
         public abstract string GetId(string channelName = null);
         /// <summary>
         /// Stores ChannelID/UserID if it was already resolved.

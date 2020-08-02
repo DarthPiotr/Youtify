@@ -58,15 +58,65 @@ namespace YoutifyLib.Spotify
 
             return playlist.Id;
         }
-
+        /// <summary>
+        /// Synchronizes playlist content on Service with playlist instance
+        /// </summary>
+        /// <param name="playlist">Playlist to be exported</param>
+        /// <param name="type">Type of export</param>
+        /// <returns>If the operation was successful</returns>
         public override bool ExportPlaylist(Playlist playlist, ExportType type)
         {
-            throw new NotImplementedException();
-        }
+            switch (type)
+            {
+                case ExportType.AddAll:
+                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
 
+                case ExportType.AddDistinct:
+                    var toSubmit = Utils.SongsToIdList(playlist.Songs);
+                    var imported = ImportPlaylist(playlist.Id);
+                    var current = Utils.SongsToIdList(imported.Songs);
+
+                    foreach (var e in current)
+                        toSubmit.RemoveAll(x => { return x == e; });
+
+                    return ExportList(toSubmit, playlist.Id);
+                case ExportType.Override:
+                    RemoveFromPlaylist(playlist);
+                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+            }
+            return false;
+        }
+        /// <summary>
+        /// Adds every id to the playlist
+        /// </summary>
+        /// <param name="idList">list of ids to add</param>
+        /// <param name="playlistId">id of a playlist</param>
+        /// <returns>if the operation was successful</returns>
+        private bool ExportList(List<string> idList, string playlistId)
+        {
+            for(int i = 0; i < idList.Count; i++)
+                idList[i] = "spotify:track:" + idList[i];
+
+            var plair = new PlaylistAddItemsRequest(idList);
+            var request = Service.Playlists.AddItems(playlistId, plair);
+            request.Wait();
+
+            return request.Result != null;
+        }
+        /// <summary>
+        /// Returns id of channel. Spotify API does not support this.
+        /// </summary>
+        /// <param name="channelName">An artist name to resolve.
+        /// Leave empty or null to resolve current channel (OAuth)</param>
+        /// <returns>Id of a channel/user</returns>
+        [Obsolete("This feature is not supported by Spotify API", false)]
         public override string GetId(string channelName = null)
         {
-            throw new NotImplementedException();
+            if (channelId != null &&
+                channelName == null)
+                return channelId;
+
+            return string.Empty;
         }
 
         /// <summary>
@@ -161,7 +211,7 @@ namespace YoutifyLib.Spotify
         /// Setting up Spotify Service with API key and OAuth. Used in constructor.
         /// </summary>
         /// <returns>Task to setup Spotify Service</returns>
-        //  From Spotify API docs:
+        //  From Spotify API .NET docs:
         //  https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Docs/docs/authorization_code.md
         protected override async Task ServiceInitAsync()
         {
@@ -235,10 +285,34 @@ namespace YoutifyLib.Spotify
         /// <param name="playlist">Playlist that will be modified</param>
         /// <param name="tracks">List of track to remove</param>
         /// <returns>If the operation was successful</returns>
-        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> track = null)
+        public override bool RemoveFromPlaylist(Playlist playlist, List<Track> tracks = null)
         {
+            // get current version of the playlist
+            var list = ImportPlaylist(playlist.Id).Songs;
+
+            // leave on the list only elements to remove
+            if (tracks != null)
+            {
+                bool found;
+                foreach (SpotifyTrack imported in list.ToArray())
+                {
+                    found = false;
+                    foreach (SpotifyTrack track in tracks)
+                    {
+                        if (track.ID == imported.ID)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        list.RemoveAll(e => imported == e);
+                }
+            }
+
             var priri = new List<PlaylistRemoveItemsRequest.Item>();
-            foreach(SpotifyTrack st in track)
+            foreach(SpotifyTrack st in list)
             {
                 priri.Add(
                     new PlaylistRemoveItemsRequest.Item()
@@ -248,7 +322,6 @@ namespace YoutifyLib.Spotify
 
             var prir = new PlaylistRemoveItemsRequest(priri);
             var request = Service.Playlists.RemoveItems(playlist.Id, prir);
-
             request.Wait();
 
             return request.Result != null;
