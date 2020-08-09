@@ -158,23 +158,25 @@ namespace YoutifyLib.YouTube
         /// <returns>List of matching results</returns>
         public override List<Track> SearchForTracks(string query, int maxResults = 5)
         {
-            // output list
-            var list = new List<Track>();
+            try
+            { 
+                // output list
+                var list = new List<Track>();
 
-            // prepare request
-            var request = Task.Run(() =>
-            {
-                var req = Service.Search.List("snippet");
-                req.Q = query;
-                req.MaxResults = maxResults;
-                req.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None; // just in case
-                req.Type = "youtube#video";
-                req.Order = SearchResource.ListRequest.OrderEnum.Relevance;
+                // prepare request
+                var request = Task.Run(() =>
+                {
+                    var req = Service.Search.List("snippet");
+                    req.Q = query;
+                    req.MaxResults = maxResults;
+                    req.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None; // just in case
+                    req.Type = "youtube#video";
+                    req.Order = SearchResource.ListRequest.OrderEnum.Relevance;
 
-                var res = req.ExecuteAsync();
+                    var res = req.ExecuteAsync();
 
-                return res.Result;
-            });
+                    return res.Result;
+                });
 
             // execute till it's done
             request.Wait();
@@ -190,6 +192,12 @@ namespace YoutifyLib.YouTube
             }
 
             return list;
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While searching for tracks playlist: {0}, {1}", e.Message, e.InnerException);
+                return null;
+            }
         }
         /// <summary>
         /// Returns a playlist with all tracks (if specified) and metadata
@@ -247,14 +255,14 @@ namespace YoutifyLib.YouTube
                         nextToken = request.Result.NextPageToken;
                     }
                 }
+
+                return pl;
             }
             catch (Exception e)
             {
-                Utils.LogError("In ImportPlaylist: {0}", e.Message);
+                Utils.LogError("While importing playlist: {0}, {1}", e.Message, e.InnerException);
                 return null;
             }
-
-            return pl;
         }
         /// <summary>
         /// Synchronizes playlist content on Service with playlist instance
@@ -264,25 +272,33 @@ namespace YoutifyLib.YouTube
         /// <returns>If the operation was successful</returns>
         public override bool ExportPlaylist(Playlist playlist, ExportType type)
         {
-            switch (type)
-            {
-                case ExportType.AddAll:
-                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+            try
+            { 
+                switch (type)
+                {
+                    case ExportType.AddAll:
+                        return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
 
-                case ExportType.AddDistinct:
-                    var toSubmit = Utils.SongsToIdList(playlist.Songs);
-                    var imported = ImportPlaylist(playlist.Id);
-                    var current = Utils.SongsToIdList(imported.Songs);
+                    case ExportType.AddDistinct:
+                        var toSubmit = Utils.SongsToIdList(playlist.Songs);
+                        var imported = ImportPlaylist(playlist.Id);
+                        var current = Utils.SongsToIdList(imported.Songs);
                     
-                    foreach (var e in current)
-                        toSubmit.RemoveAll(x => { return x == e; });
+                        foreach (var e in current)
+                            toSubmit.RemoveAll(x => { return x == e; });
 
-                    return ExportList(toSubmit, playlist.Id);
-                case ExportType.Override:
-                    RemoveFromPlaylist(playlist);
-                    return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+                        return ExportList(toSubmit, playlist.Id);
+                    case ExportType.Override:
+                        RemoveFromPlaylist(playlist);
+                        return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+                }
+                return false;
             }
-            return false;
+            catch (Exception e)
+            {
+                Utils.LogError("While exporting playlist: {0}, {1}", e.Message, e.InnerException);
+                return false;
+            }
         }
         /// <summary>
         /// Adds every song from Songs property to playlist

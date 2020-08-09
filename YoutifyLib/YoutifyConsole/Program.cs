@@ -25,8 +25,18 @@ namespace YoutifyConsole
             //
 
             // init service and treat like generic one
-            var serv = new SpotifyHandler();
-            ServiceHandler service = serv;
+            var spotify = new SpotifyHandler();
+            var youtube = new YouTubeHandler();
+
+            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX", spotify);
+
+            Console.WriteLine("Success: {0}\nException: {1}\nErrored tracks: {2}\n",
+                resp.Success, resp?.Exception?.Message, resp.Errors.Count);
+
+            var randomThingJustBecauseINeededBreakpointRightHere = 1;
+
+            /*
+            ServiceHandler service = spotify;
 
             /////////////////////////////
             // Creating a new playlist
@@ -47,7 +57,7 @@ namespace YoutifyConsole
             
             //x.Description = "At least for me. I hope for you too!";
             //service.UpdateSnippet(x);
-            
+            /*
             x.Songs.Add(service.SearchForTracks("discopolis 2.0")[0]);
             x.Songs.Add(service.SearchForTracks("blah blah blah Armin")[0]);
             x.Songs.Add(service.SearchForTracks("strange world avira")[0]);

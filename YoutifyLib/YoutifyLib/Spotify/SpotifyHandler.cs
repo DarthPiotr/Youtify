@@ -44,19 +44,28 @@ namespace YoutifyLib.Spotify
         /// <returns>Id of created playlist. Null if there were problems</returns>
         public override string CreatePlaylist(ref Playlist playlist)
         {
-            var plreq = new PlaylistCreateRequest(playlist.Title) {
-                Description = playlist.Description,
-                Public = playlist.Status == "public"
-            };
+            try
+            {
+                var plreq = new PlaylistCreateRequest(playlist.Title)
+                {
+                    Description = playlist.Description,
+                    Public = playlist.Status == "public"
+                };
 
-            var request = Service.Playlists.Create(UserId, plreq);
-            request.Wait();
+                var request = Service.Playlists.Create(UserId, plreq);
+                request.Wait();
 
-            var spotifyPlaylist = playlist.ToType<SpotifyPlaylist>();
-            spotifyPlaylist.Id = request.Result.Id;
-            playlist = spotifyPlaylist;
+                var spotifyPlaylist = playlist.ToType<SpotifyPlaylist>();
+                spotifyPlaylist.Id = request.Result.Id;
+                playlist = spotifyPlaylist;
 
-            return playlist.Id;
+                return playlist.Id;
+            }
+            catch(Exception e)
+            {
+                Utils.LogError("While creating playlist: {0}, {1}", e.Message, e.InnerException);
+                return null;
+            }
         }
         /// <summary>
         /// Synchronizes playlist content on Service with playlist instance
@@ -94,14 +103,21 @@ namespace YoutifyLib.Spotify
         /// <returns>if the operation was successful</returns>
         private bool ExportList(List<string> idList, string playlistId)
         {
-            for(int i = 0; i < idList.Count; i++)
-                idList[i] = "spotify:track:" + idList[i];
+            try { 
+                for (int i = 0; i < idList.Count; i++)
+                    idList[i] = "spotify:track:" + idList[i];
 
-            var plair = new PlaylistAddItemsRequest(idList);
-            var request = Service.Playlists.AddItems(playlistId, plair);
-            request.Wait();
+                var plair = new PlaylistAddItemsRequest(idList);
+                var request = Service.Playlists.AddItems(playlistId, plair);
+                request.Wait();
 
-            return request.Result != null;
+                return request.Result != null;
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While exporting playlist: {0}, {1}", e.Message, e.InnerException);
+                return false;
+            }
         }
         /// <summary>
         /// Returns id of channel. Spotify API does not support this.
@@ -150,7 +166,7 @@ namespace YoutifyLib.Spotify
             }
             catch (Exception e)
             {
-                Utils.LogError(e.Message);
+                Utils.LogError("While importing playlist: {0}, {1}", e.Message, e.InnerException);
                 return null;
             }
 
@@ -174,7 +190,7 @@ namespace YoutifyLib.Spotify
             }
             catch (Exception e)
             {
-                Utils.LogError(e.Message);
+                Utils.LogError("While searching for tracks: {0}, {1}", e.Message, e.InnerException);
                 return null;
             }
 
@@ -287,44 +303,53 @@ namespace YoutifyLib.Spotify
         /// <returns>If the operation was successful</returns>
         public override bool RemoveFromPlaylist(Playlist playlist, List<Track> tracks = null)
         {
-            // get current version of the playlist
-            var list = ImportPlaylist(playlist.Id).Songs;
-
-            // leave on the list only elements to remove
-            if (tracks != null)
+            try
             {
-                bool found;
-                foreach (SpotifyTrack imported in list.ToArray())
+                // get current version of the playlist
+                var list = ImportPlaylist(playlist.Id).Songs;
+
+                // leave on the list only elements to remove
+                if (tracks != null)
                 {
-                    found = false;
-                    foreach (SpotifyTrack track in tracks)
+                    bool found;
+                    foreach (SpotifyTrack imported in list.ToArray())
                     {
-                        if (track.ID == imported.ID)
+                        found = false;
+                        foreach (SpotifyTrack track in tracks)
                         {
-                            found = true;
-                            break;
+                            if (track.ID == imported.ID)
+                            {
+                                found = true;
+                                break;
+                            }
                         }
+
+                        if (!found)
+                            list.RemoveAll(e => imported == e);
                     }
-
-                    if (!found)
-                        list.RemoveAll(e => imported == e);
                 }
-            }
 
-            var priri = new List<PlaylistRemoveItemsRequest.Item>();
-            foreach(SpotifyTrack st in list)
+                var priri = new List<PlaylistRemoveItemsRequest.Item>();
+                foreach(SpotifyTrack st in list)
+                {
+                    priri.Add(
+                        new PlaylistRemoveItemsRequest.Item()
+                            { Uri = "spotify:track:" + st.ID }
+                        );
+                }
+
+                var prir = new PlaylistRemoveItemsRequest(priri);
+                var request = Service.Playlists.RemoveItems(playlist.Id, prir);
+                request.Wait();
+
+                return request.Result != null;
+
+            }
+            catch (Exception e)
             {
-                priri.Add(
-                    new PlaylistRemoveItemsRequest.Item()
-                        { Uri = "spotify:track:" + st.ID }
-                    );
+                Utils.LogError("While removing from playlist: {0}, {1}", e.Message, e.InnerException);
+                return false;
             }
-
-            var prir = new PlaylistRemoveItemsRequest(priri);
-            var request = Service.Playlists.RemoveItems(playlist.Id, prir);
-            request.Wait();
-
-            return request.Result != null;
-        }
+}
     }
 }

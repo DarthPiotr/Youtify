@@ -7,6 +7,8 @@ namespace YoutifyLib.Algorithm
 {
     public static class Algorithm
     {
+        ///////////////////////////////
+        //   Configuration
         /// <summary>
         /// Opening brackets list. Indexes must match with corresponding closing brackets in cBrackets
         /// </summary>
@@ -15,7 +17,6 @@ namespace YoutifyLib.Algorithm
         /// Closing brackets list. Indexes must match with corresponding opening brackets in oBrackets
         /// </summary>
         public static List<char> cBrackets          = new List<char> { ')', ']', '}', '>' };
-
         /// <summary>
         /// Symbols that divide track into artist and title part
         /// </summary>
@@ -37,7 +38,8 @@ namespace YoutifyLib.Algorithm
         /// </summary>
         public static List<string> removeStrings     = new List<string> { "\"", "'", "“", "”" };
 
-
+        /////////////////////////////
+        //     Public Methods
         /// <summary>
         /// Returns metedata extracted from a YouTube title. Data can be not 100% accurate.
         /// </summary>
@@ -132,7 +134,6 @@ namespace YoutifyLib.Algorithm
 
             return meta;
         }
-
         /// <summary>
         /// Returns metedata extracted from a Spotify title. Data can be not 100% accurate.
         /// </summary>
@@ -176,29 +177,6 @@ namespace YoutifyLib.Algorithm
             }
 
             return meta;
-        }
-
-        /// <summary>
-        /// Used to extract "featuring" part of the video. This part will be removed from the snippet.
-        /// </summary>
-        /// <param name="snippet">String to extract from. "Featuring" part will be removed from the string.</param>
-        /// <returns>"Featuring" part</returns>
-        private static string ExtractFeatPart(ref string snippet)
-        {
-            string featPart = "";
-            foreach (var div in featDiv) // for each string that can divide "featuring" part
-            {
-                // "featuring" string must be preceded with space,
-                // in case it's last letters of some other word
-                var tmpi = snippet.IndexOf(" " + div); 
-                if (tmpi != -1) // if found
-                {
-                    featPart = TrimFeaturing(snippet.Substring(tmpi+1), div); // cut "featuring" part
-                    snippet = snippet.Substring(0, tmpi);  // make snippet without "featuring" part
-                    break;
-                }
-            }
-            return featPart;
         }
         /// <summary>
         /// Extracts text from every bracket. Brackets will be removed from the snippet.
@@ -255,6 +233,82 @@ namespace YoutifyLib.Algorithm
 
             // return list of bracket contents
             return list;
+        }
+        
+        public static ConvertResponse Convert(ServiceHandler serviceFrom, Playlist playlist, ServiceHandler serviceTo)
+        {
+            return Convert(serviceFrom, playlist.Id, serviceTo);
+        }
+
+        public static ConvertResponse Convert(ServiceHandler serviceFrom, string playlistId, ServiceHandler serviceTo)
+        {
+            Playlist output;
+            List<Track> Errors = new List<Track>();
+
+            try
+            {
+                // make sure that playlist is up-to-date
+                Playlist current = serviceFrom.ImportPlaylist(playlistId);
+
+                // prepare the playlist
+                output = new Playlist(current.Title, current.Description);
+                if (serviceTo.CreatePlaylist(ref output) == null)
+                    throw new Exception("Playlist could not be created");
+                if (!serviceTo.UpdateSnippet(output))
+                    throw new Exception("Playlist information could not be updated");
+
+                foreach (Track track in current.Songs)
+                {
+                    var searchResult = serviceTo.SearchForTracks(track.Metadata.GetSearchString(), 1);
+                    if (searchResult.Count > 0)
+                        output.Songs.Add(searchResult[0]);
+                    else
+                        Errors.Add(track);
+                }
+
+                if (!serviceTo.ExportPlaylist(output, ExportType.AddAll))
+                    throw new Exception("Playlist could not be exported");
+            }
+            catch(Exception e)
+            {
+                Utils.LogError("During conversion: {0}, {1}", e.Message, e.InnerException);
+                return new ConvertResponse
+                {
+                    Success = false,
+                    Exception = e
+                };
+            }
+
+            return new ConvertResponse
+            {
+                Success = true,
+                Playlist = output,
+                Errors = Errors
+            };
+        }
+        /////////////////////////////////
+        //   Private Methods
+        /// <summary>
+        /// Used to extract "featuring" part of the video. This part will be removed from the snippet.
+        /// </summary>
+        /// <param name="snippet">String to extract from. "Featuring" part will be removed from the string.</param>
+        /// <returns>"Featuring" part</returns>
+        private static string ExtractFeatPart(ref string snippet)
+        {
+            string featPart = "";
+            foreach (var div in featDiv) // for each string that can divide "featuring" part
+            {
+                // "featuring" string must be preceded with space,
+                // in case it's last letters of some other word
+                var tmpi = snippet.IndexOf(" " + div);
+                if (tmpi != -1) // if found
+                {
+                    featPart = TrimFeaturing(snippet.Substring(tmpi + 1), div); // cut "featuring" part
+                    snippet = snippet.Substring(0, tmpi);  // make snippet without "featuring" part
+                    break;
+                }
+            }
+            return featPart;
         }
         /// <summary>
         /// Searches for matching closing bracket in the string. 
