@@ -7,7 +7,7 @@ namespace YoutifyLib.Algorithm
     /// <summary>
     /// Handles response of playlist conversion between services
     /// </summary>
-    public class ConvertResponse
+    public class ConvertResult
     {
         /// <summary>
         /// If the operation was successful.

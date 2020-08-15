@@ -28,7 +28,7 @@ namespace YoutifyConsole
             var spotify = new SpotifyHandler();
             var youtube = new YouTubeHandler();
 
-            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7K_cIe7vgNGbippeC6kkbxX", spotify);
+            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7L8XMCxWJ9POnp7-qsgMeqV", spotify);
 
             Console.WriteLine("Success: {0}\nException: {1}\nErrored tracks: {2}\n",
                 resp.Success, resp?.Exception?.Message, resp.Errors.Count);

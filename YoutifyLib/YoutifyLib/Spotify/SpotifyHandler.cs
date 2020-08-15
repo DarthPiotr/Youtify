@@ -92,6 +92,8 @@ namespace YoutifyLib.Spotify
                 case ExportType.Override:
                     RemoveFromPlaylist(playlist);
                     return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+                case ExportType.None:
+                    return true;
             }
             return false;
         }
@@ -207,10 +209,11 @@ namespace YoutifyLib.Spotify
             {
                 var details = new PlaylistChangeDetailsRequest
                 {
-                    Description = playlist.Description,
                     Name = playlist.Title,
                     Public = playlist.Status == "public"
                 };
+                if (!string.IsNullOrEmpty(playlist.Description))
+                    details.Description = playlist.Description;
 
                 var req = Service.Playlists.ChangeDetails(playlist.Id, details);
                 req.Wait();

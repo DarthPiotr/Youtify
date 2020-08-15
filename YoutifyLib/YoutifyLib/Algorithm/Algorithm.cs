@@ -234,58 +234,177 @@ namespace YoutifyLib.Algorithm
             // return list of bracket contents
             return list;
         }
-        
-        public static ConvertResponse Convert(ServiceHandler serviceFrom, Playlist playlist, ServiceHandler serviceTo)
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlistId">Id of the source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistId, ServiceHandler serviceTo)
         {
-            return Convert(serviceFrom, playlist.Id, serviceTo);
+            // make sure that input playlist is up-to-date
+            Playlist playlist = serviceFrom.ImportPlaylist(playlistId);
+            if(playlist != null)
+                return Convert(serviceFrom, playlist, serviceTo);
+
+            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
+            return new ConvertResult
+            {
+                Success = false,
+                Exception = new Exception("An exception occured while importing input playlist")
+            };
         }
-
-        public static ConvertResponse Convert(ServiceHandler serviceFrom, string playlistId, ServiceHandler serviceTo)
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlist">Source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlist, ServiceHandler serviceTo)
         {
-            Playlist output;
-            List<Track> Errors = new List<Track>();
-
+            Playlist output = new Playlist(playlist.Title, playlist.Description);
             try
             {
-                // make sure that playlist is up-to-date
-                Playlist current = serviceFrom.ImportPlaylist(playlistId);
-
-                // prepare the playlist
-                output = new Playlist(current.Title, current.Description);
+                // prepare new playlist
                 if (serviceTo.CreatePlaylist(ref output) == null)
                     throw new Exception("Playlist could not be created");
                 if (!serviceTo.UpdateSnippet(output))
                     throw new Exception("Playlist information could not be updated");
-
-                foreach (Track track in current.Songs)
-                {
-                    var searchResult = serviceTo.SearchForTracks(track.Metadata.GetSearchString(), 1);
-                    if (searchResult.Count > 0)
-                        output.Songs.Add(searchResult[0]);
-                    else
-                        Errors.Add(track);
-                }
-
-                if (!serviceTo.ExportPlaylist(output, ExportType.AddAll))
-                    throw new Exception("Playlist could not be exported");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Utils.LogError("During conversion: {0}, {1}", e.Message, e.InnerException);
-                return new ConvertResponse
+                Utils.LogError("Convert failed due to unsuccessful creation of new playlist.");
+                return new ConvertResult
                 {
                     Success = false,
                     Exception = e
                 };
             }
 
-            return new ConvertResponse
+            return Convert(serviceFrom, playlist, serviceTo, output, ExportType.AddAll);
+        }
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlistIdFrom">Id of the source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <param name="playlistIdTo">Id of the target playlist</param>
+        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistIdFrom,
+            ServiceHandler serviceTo, string playlistIdTo, ExportType exportType)
+        {
+            // make sure that input playlist is up-to-date
+            Playlist playlist = serviceFrom.ImportPlaylist(playlistIdFrom);
+            if (playlist != null)
+                return Convert(serviceFrom, playlist, serviceTo, playlistIdTo, exportType);
+
+            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
+            return new ConvertResult
+            {
+                Success = false,
+                Exception = new Exception("An exception occured while importing input playlist")
+            };
+        }
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlistIdFrom">Id of the source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <param name="playlistTo">Target playlist</param>
+        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistIdFrom,
+            ServiceHandler serviceTo, Playlist playlistTo, ExportType exportType = ExportType.None)
+        {
+            // make sure that input playlist is up-to-date
+            Playlist playlist = serviceFrom.ImportPlaylist(playlistIdFrom);
+            if (playlist != null)
+                return Convert(serviceFrom, playlist, serviceTo, playlistTo, exportType);
+
+            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
+            return new ConvertResult
+            {
+                Success = false,
+                Exception = new Exception("An exception occured while importing input playlist")
+            };
+        }
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlistFrom">Source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <param name="playlistIdTo">Id of the target playlist</param>
+        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlistFrom,
+            ServiceHandler serviceTo, string playlistIdTo, ExportType exportType)
+        {
+            // make sure that outpul playlist is up-to-date
+            Playlist playlist = serviceTo.ImportPlaylist(playlistIdTo);
+            if (playlist != null)
+                return Convert(serviceFrom, playlistFrom, serviceTo, playlist, exportType);
+
+            Utils.LogError("Convert failed due to unsuccessful output playlist import.");
+            return new ConvertResult
+            {
+                Success = false,
+                Exception = new Exception("An exception occured while importing output playlist")
+            };
+        }
+        /// <summary>
+        /// Converts a playlist between services
+        /// </summary>
+        /// <param name="serviceFrom">A service that is used by source playlist</param>
+        /// <param name="playlistFrom">Source playlist</param>
+        /// <param name="serviceTo">The targeted service</param>
+        /// <param name="playlistTo">Target playlist</param>
+        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
+        /// <returns>An instance of Convert Result</returns>
+        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlistFrom,
+            ServiceHandler serviceTo, Playlist playlistTo, ExportType exportType = ExportType.None)
+        {
+            List<Track> Errors = new List<Track>();
+
+            try
+            {
+                foreach (Track track in playlistFrom.Songs)
+                {
+                    string query = track.Metadata.GetSearchString();
+                    Utils.LogInfo("Searching for\"{0}\"", query);
+                    var searchResult = serviceTo.SearchForTracks(query, 1);
+                    if (searchResult.Count > 0)
+                        playlistTo.Songs.Add(searchResult[0]);
+                    else
+                        Errors.Add(track);
+                }
+
+                if (!serviceTo.ExportPlaylist(playlistTo, exportType))
+                    throw new Exception("Playlist could not be exported");
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("During conversion: {0}, {1}", e.Message, e.InnerException);
+                return new ConvertResult
+                {
+                    Success = false,
+                    Exception = e
+                };
+            }
+
+            return new ConvertResult
             {
                 Success = true,
-                Playlist = output,
+                Playlist = playlistTo,
                 Errors = Errors
             };
         }
+        
         /////////////////////////////////
         //   Private Methods
         /// <summary>

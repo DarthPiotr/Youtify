@@ -23,18 +23,23 @@ namespace YoutifyLib.YouTube
         /// </summary>
         /// <returns></returns>
         public Google.Apis.YouTube.v3.Data.Playlist GetYouTubePlaylist()
-            => new Google.Apis.YouTube.v3.Data.Playlist
+        {
+            var googlePlaylist = new Google.Apis.YouTube.v3.Data.Playlist
             {
                 Id = this.Id,
                 Snippet = new PlaylistSnippet
                 {
-                    Title = this.Title,
-                    Description = this.Description
+                    Title = this.Title
                 },
                 Status = new PlaylistStatus
                 {
                     PrivacyStatus = this.Status
                 }
             };
+            if (!string.IsNullOrEmpty(this.Description))
+                googlePlaylist.Snippet.Description = this.Description;
+
+            return googlePlaylist;
+        }
     }
 }

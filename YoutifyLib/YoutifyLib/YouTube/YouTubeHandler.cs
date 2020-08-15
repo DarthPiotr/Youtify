@@ -291,6 +291,8 @@ namespace YoutifyLib.YouTube
                     case ExportType.Override:
                         RemoveFromPlaylist(playlist);
                         return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
+                    case ExportType.None:
+                        return true;
                 }
                 return false;
             }

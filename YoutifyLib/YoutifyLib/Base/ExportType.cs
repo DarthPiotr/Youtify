@@ -10,6 +10,10 @@ namespace YoutifyLib
     public enum ExportType
     {
         /// <summary>
+         /// Do not export anything
+         /// </summary>
+        None,
+        /// <summary>
         /// Adds only tracks that are not already on playlist
         /// </summary>
         AddDistinct,
