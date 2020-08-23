@@ -1,13 +1,13 @@
-﻿using SpotifyAPI;
-using SpotifyAPI.Web;
-using SpotifyAPI.Web.Http;
+﻿using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
+using Newtonsoft.Json;
+
+using static SpotifyAPI.Web.Scopes;
 
 namespace YoutifyLib.Spotify
 {
@@ -25,16 +25,23 @@ namespace YoutifyLib.Spotify
         /// <summary>
         /// Embedded OAuth server to get response for authorization
         /// </summary>
-        private static EmbedIOAuthServer _server;
+        private static EmbedIOAuthServer server;
         /// <summary>
-        /// Waits for Spotify event to recieve athorization and continue with the initialization
+        /// Specifies the path to file where access token is stored.
         /// </summary>
-        private static AutoResetEvent are = new AutoResetEvent(false);
+        public static string CredentialsPath { get; set; } = "credentials.json";
 
         public SpotifyHandler()
         {
             if (Service == null)
-                Task.Run(ServiceInitAsync).Wait();
+            {
+                Utils.LogInfo("Initializing Spotify service...");
+                if(File.Exists(CredentialsPath))
+                    Task.Run(ReadCredentials).Wait();
+                else
+                    Task.Run(ServiceInitAsync).Wait();
+            }
+                
         }
         /// <summary>
         /// Creates a playlist, using Spotify API.
@@ -227,76 +234,90 @@ namespace YoutifyLib.Spotify
             }
         }
         /// <summary>
-        /// Setting up Spotify Service with API key and OAuth. Used in constructor.
+        /// Setting up Spotify Service with API key and OAuth. Only when credentials file is not found.
         /// </summary>
         /// <returns>Task to setup Spotify Service</returns>
         //  From Spotify API .NET docs:
         //  https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Docs/docs/authorization_code.md
         protected override async Task ServiceInitAsync()
         {
-            Utils.LogInfo("Initializing Spotify service...");
-
             // you don't want server logging mess in your console output
             Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
 
             try
             {
-                _server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000); 
-                await _server.Start();
-                _server.AuthorizationCodeReceived += OnAuthorizationCodeReceived;
+                var (verifier, challenge) = PKCEUtil.GenerateCodes();
 
-                var request = new LoginRequest(_server.BaseUri, Secrets.SpotifyClientID, LoginRequest.ResponseType.Code)
+                // prepare OAuth server for verification
+                server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+                await server.Start();
+                server.AuthorizationCodeReceived += 
+                    async (sender, response) =>
+                    {
+                        await server.Stop();
+
+                        PKCETokenResponse token = await new OAuthClient().RequestToken(
+                            new PKCETokenRequest(Secrets.SpotifyClientID, response.Code, server.BaseUri, verifier)
+                        );
+
+                        await File.WriteAllTextAsync(CredentialsPath, JsonConvert.SerializeObject(token));
+                        await ReadCredentials();
+                    };
+
+                var request = new LoginRequest(server.BaseUri, Secrets.SpotifyClientID, LoginRequest.ResponseType.Code)
                 {
+                    CodeChallenge = challenge,
+                    CodeChallengeMethod = "S256",
                     Scope = new List<string> {
-                        Scopes.UserReadPrivate,
-                        Scopes.PlaylistModifyPublic,
-                        Scopes.PlaylistModifyPrivate,
-                        Scopes.PlaylistReadCollaborative,
-                        Scopes.PlaylistReadPrivate }
+                        UserReadPrivate,
+                        PlaylistModifyPublic,
+                        PlaylistModifyPrivate,
+                        PlaylistReadCollaborative,
+                        PlaylistReadPrivate }
                 };
-                BrowserUtil.Open(request.ToUri());
-                Utils.LogInfo("Waiting for Authorization Token...");
-                are.WaitOne();
-                Utils.LogInfo("Auth Token Recieved!");
-                try
-                {
-                    var req = Service.UserProfile.Current();
-                    req.Wait();
-                    UserId = req.Result.Id;
 
-                    Utils.LogInfo("User Id is ready to use!");
-                }
-                catch (Exception e)
-                {
-                    Utils.LogError("While getting user ID: {0}, {1}", e.Message, e.InnerException.Message);
-                }
+                BrowserUtil.Open(request.ToUri());
             }
             catch (Exception e)
             {
                 Utils.LogError("While initializing Spotify: {0}, {1}", e.Message, e.InnerException.Message);
             }
-            Utils.LogInfo("Initializing Spotify done!");
         }
         /// <summary>
-        /// Handler for OAuth server, when authorization code is recieved, finish setting up the Service property
+        /// Setting up Spotify using saved credentials
         /// </summary>
-        private static async Task OnAuthorizationCodeReceived(object sender, AuthorizationCodeResponse response)
+        // Auth magic from here
+        //    https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Web.Examples/Example.CLI.PersistentConfig/Program.cs
+        private static async Task ReadCredentials()
         {
-            await _server.Stop();
+            var json = await File.ReadAllTextAsync(CredentialsPath);
+            var token = JsonConvert.DeserializeObject<PKCETokenResponse>(json);
 
-            var config = SpotifyClientConfig.CreateDefault();
-            var tokenResponse = await new OAuthClient(config).RequestToken(
-              new AuthorizationCodeTokenRequest(
-                Secrets.SpotifyClientID, Secrets.SpotifyClientSecret, response.Code,
-                new Uri("http://localhost:5000/callback")
-              )
-            );
+            var authenticator = new PKCEAuthenticator(Secrets.SpotifyClientID, token);
+            authenticator.TokenRefreshed += (sender, token) =>
+                File.WriteAllText(CredentialsPath, JsonConvert.SerializeObject(token));
 
-            Service = new SpotifyClient(tokenResponse.AccessToken);
-            // TODO: save token?
+            var config = SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator);
 
-            // Continue initialization
-            are.Set();
+            // creating Spotify Client to use later
+            Service = new SpotifyClient(config);
+            
+            server?.Dispose();
+
+            // Continue initialization, get user Id
+            try
+            {
+                var req = Service.UserProfile.Current();
+                req.Wait();
+                UserId = req.Result.Id;
+
+                Utils.LogInfo("User Id is ready to use!");
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While getting user ID: {0}, {1}", e.Message, e.InnerException.Message);
+            }
+            Utils.LogInfo("Initializing Spotify done!");
         }
         /// <summary>
         /// Removes the specified tracks from playlist

@@ -7,6 +7,9 @@
 Secret*.cs
 *client_secret*.json
 
+#ignore old directory
+/YoutifyLib/old
+
 # User-specific files
 *.rsuser
 *.suo
@@ -352,4 +355,3 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/YoutifyLib/YoutifyLib/Algorithm/Algorithm.cs

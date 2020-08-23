@@ -62,7 +62,7 @@ namespace YoutifyLib.YouTube
             }
             catch (Exception e)
             {
-                // TODO: Proper exception handling
+                // TODO: Proper exception handling ?
                 Utils.LogError(e.Message);
             }
             Utils.LogInfo("Initializing service done!");

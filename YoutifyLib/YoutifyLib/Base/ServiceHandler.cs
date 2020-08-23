@@ -9,8 +9,6 @@ namespace YoutifyLib
     /// </summary>
     public abstract class ServiceHandler
     {
-        // TODO: Make inheriting classes static, with static service, so that it will be configured only once. In order not to allow multiple service instanes within one application
-
         public ServiceHandler()
         {
             //Task.Run(ServiceInitAsync).Wait();
