@@ -7,7 +7,7 @@ namespace YoutifyLib
     /// <summary>
     /// Utilities class
     /// </summary>
-    public static class Utils
+    internal static class Utils
     {
         ///////////////////////////////////////
         //    Debug Logs

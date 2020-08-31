@@ -26,17 +26,13 @@ namespace YoutifyLib.Spotify
         /// Embedded OAuth server to get response for authorization
         /// </summary>
         private static EmbedIOAuthServer server;
-        /// <summary>
-        /// Specifies the path to file where access token is stored.
-        /// </summary>
-        public static string CredentialsPath { get; set; } = "credentials.json";
 
         public SpotifyHandler()
         {
             if (Service == null)
             {
                 Utils.LogInfo("Initializing Spotify service...");
-                if(File.Exists(CredentialsPath))
+                if(File.Exists(YoutifyConfig.CredentialsPath))
                     Task.Run(ReadCredentials).Wait();
                 else
                     Task.Run(ServiceInitAsync).Wait();
@@ -257,14 +253,14 @@ namespace YoutifyLib.Spotify
                         await server.Stop();
 
                         PKCETokenResponse token = await new OAuthClient().RequestToken(
-                            new PKCETokenRequest(Secrets.SpotifyClientID, response.Code, server.BaseUri, verifier)
+                            new PKCETokenRequest(YoutifyConfig.SpotifyClientId, response.Code, server.BaseUri, verifier)
                         );
 
-                        await File.WriteAllTextAsync(CredentialsPath, JsonConvert.SerializeObject(token));
+                        await File.WriteAllTextAsync(YoutifyConfig.CredentialsPath, JsonConvert.SerializeObject(token));
                         await ReadCredentials();
                     };
 
-                var request = new LoginRequest(server.BaseUri, Secrets.SpotifyClientID, LoginRequest.ResponseType.Code)
+                var request = new LoginRequest(server.BaseUri, YoutifyConfig.SpotifyClientId, LoginRequest.ResponseType.Code)
                 {
                     CodeChallenge = challenge,
                     CodeChallengeMethod = "S256",
@@ -290,12 +286,12 @@ namespace YoutifyLib.Spotify
         //    https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Web.Examples/Example.CLI.PersistentConfig/Program.cs
         private static async Task ReadCredentials()
         {
-            var json = await File.ReadAllTextAsync(CredentialsPath);
+            var json = await File.ReadAllTextAsync(YoutifyConfig.CredentialsPath);
             var token = JsonConvert.DeserializeObject<PKCETokenResponse>(json);
 
-            var authenticator = new PKCEAuthenticator(Secrets.SpotifyClientID, token);
+            var authenticator = new PKCEAuthenticator(YoutifyConfig.SpotifyClientId, token);
             authenticator.TokenRefreshed += (sender, token) =>
-                File.WriteAllText(CredentialsPath, JsonConvert.SerializeObject(token));
+                File.WriteAllText(YoutifyConfig.CredentialsPath, JsonConvert.SerializeObject(token));
 
             var config = SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator);
 
@@ -362,7 +358,10 @@ namespace YoutifyLib.Spotify
                         );
                 }
 
-                var prir = new PlaylistRemoveItemsRequest(priri);
+                var prir = new PlaylistRemoveItemsRequest()
+                {
+                    Tracks = priri
+                };
                 var request = Service.Playlists.RemoveItems(playlist.Id, prir);
                 request.Wait();
 

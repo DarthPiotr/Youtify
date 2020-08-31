@@ -39,7 +39,7 @@ namespace YoutifyLib.YouTube
             {
                 // OAuth 
                 UserCredential credential;
-                using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
+                using (var stream = new FileStream(YoutifyConfig.YouTubeClientSecretFile, FileMode.Open, FileAccess.Read))
                 {
                     credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                         GoogleClientSecrets.Load(stream).Secrets,
@@ -55,7 +55,7 @@ namespace YoutifyLib.YouTube
                 // Google YouTube API Service
                 Service = new YouTubeService(new BaseClientService.Initializer()
                 {
-                    ApiKey = Secrets.YTKey,
+                    ApiKey = YoutifyConfig.YouTubeApiKey,
                     HttpClientInitializer = credential,
                     ApplicationName = this.GetType().ToString()
                 });
