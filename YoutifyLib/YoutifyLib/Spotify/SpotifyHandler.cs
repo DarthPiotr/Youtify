@@ -238,7 +238,14 @@ namespace YoutifyLib.Spotify
         protected override async Task ServiceInitAsync()
         {
             // you don't want server logging mess in your console output
-            Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
+            try
+            {
+                Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>();
+            }
+            catch(Exception e)
+            {
+                Utils.LogWarning("Could not unregister Console logger: {0}", e.Message);
+            }
 
             try
             {
