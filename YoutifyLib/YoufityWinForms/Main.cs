@@ -16,7 +16,7 @@ namespace YoufityWinForms
 {
     public partial class Main : Form
     {
-        private List<ServiceHandler> Services { get; set; }
+        private List<ServiceRole> Services { get; set; }
         private string PlaylistId
         {
             get => playlistid;
@@ -30,17 +30,16 @@ namespace YoufityWinForms
 
         public Main()
         {
-            Services = new List<ServiceHandler>();
-            
             InitializeComponent();
+            Services = new List<ServiceRole>();
             
-            gbStep2.Enabled = listBox1.SelectedIndex >= 0
-                           && listBox1.SelectedIndex <= Services.Count;
+            btnSelectInputUrl.Enabled = false;
+            btnDelService.Enabled = false;
         }
         /// <summary>
         /// Adding Service
         /// </summary>
-        private void Button1_Click(object sender, EventArgs e)
+        private void BtnAddService_Click(object sender, EventArgs e)
         {
             var AddServiceWindow = new AddService();
             AddServiceWindow.FormClosed += (s, e) =>
@@ -48,36 +47,29 @@ namespace YoufityWinForms
                 var addServ = s as AddService;
                 if (addServ.Service != null)
                 {
-                    Services.Add(addServ.Service);
-                    listBox1.Items.Add(addServ.Service);
+                    AddService(addServ.Service);
                 }
             };
             AddServiceWindow.ShowDialog();
+
         }
         /// <summary>
         /// Removing Service from list
         /// </summary>
-        private void BtnDel_Click(object sender, EventArgs e)
+        private void BtnDelService_Click(object sender, EventArgs e)
         {
-            if(listBox1.SelectedIndex >= 0 && listBox1.SelectedIndex <= Services.Count)
+            if (lbServices.SelectedIndex >= 0 && lbServices .SelectedIndex <= Services.Count)
             {
-                Services.RemoveAt(listBox1.SelectedIndex);
-                listBox1.Items.RemoveAt(listBox1.SelectedIndex);
+                RemoveServiceAt(lbServices.SelectedIndex);
                 PlaylistId = "";
             }
         }
         /// <summary>
         /// Selecting Service
         /// </summary>
-        private void ListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void LbServices_SelectedIndexChanged(object sender, EventArgs e)
         {
-            labSelectedService.Text = string.Format(
-                "Selected service: {0}",
-                listBox1.SelectedItem);
-            PlaylistId = "";
-
-            gbStep2.Enabled = listBox1.SelectedIndex >= 0
-                           && listBox1.SelectedIndex <= Services.Count;
+            btnDelService.Enabled = lbServices.SelectedIndex != -1;
         }
         /// <summary>
         /// Browsing user playlists
@@ -86,16 +78,16 @@ namespace YoufityWinForms
         {
             gbStep1.Enabled = false;
 
-            var serv = Services[listBox1.SelectedIndex];
+            var serv = Services[lbServices.SelectedIndex];
 
             gbStep1.Enabled = true;
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void BtnSelectInputUrl_Click(object sender, EventArgs e)
         {
             gbStep1.Enabled = false;
 
-            var selUrl = new SelectUrl(Services[listBox1.SelectedIndex]);
+            var selUrl = new SelectUrl(Services[lbServices.SelectedIndex].Service);
 
             selUrl.FormClosed += (s, e) =>
             {
@@ -106,6 +98,40 @@ namespace YoufityWinForms
             selUrl.ShowDialog();
 
             gbStep1.Enabled = true;
+        }
+
+        private void btnBrowseInput_Click(object sender, EventArgs e)
+        {
+            int i = 0;
+        }
+
+        private void AddService(ServiceHandler sh)
+        {
+            Services.Add(new ServiceRole(sh));
+            lbServices.Items.Add(sh.Name);
+            cbSourceService.Items.Add(sh.Name);
+        }
+
+        private void RemoveServiceAt(int index)
+        {
+            Services.RemoveAt(index);
+            lbServices.Items.RemoveAt(index);
+            cbSourceService.Items.RemoveAt(index);
+
+            CbSourceService_SelectedIndexChanged(lbServices, null);
+        }
+
+        private void CbSourceService_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnSelectInputUrl.Enabled = cbSourceService.SelectedIndex != -1;
+            for (int i = 0; i < Services.Count; i++)
+                Services[i].Source = i == cbSourceService.SelectedIndex;
+        }
+
+        private void LbServices_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+                BtnDelService_Click(sender, e);
         }
     }
 }

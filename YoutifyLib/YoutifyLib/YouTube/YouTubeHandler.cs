@@ -23,6 +23,7 @@ namespace YoutifyLib.YouTube
 
         public YouTubeHandler()
         {
+            Name = "YouTube";
             if (Service == null)
                 Task.Run(ServiceInitAsync).Wait();
             PlaylistsPage = new YouTubePlaylistsHandler(Service);

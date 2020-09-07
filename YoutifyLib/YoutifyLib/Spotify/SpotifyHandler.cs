@@ -29,6 +29,7 @@ namespace YoutifyLib.Spotify
 
         public SpotifyHandler()
         {
+            Name = "Spotify";
             if (Service == null)
             {
                 Utils.LogInfo("Initializing Spotify service...");

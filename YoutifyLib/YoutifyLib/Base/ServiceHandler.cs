@@ -9,10 +9,10 @@ namespace YoutifyLib
     /// </summary>
     public abstract class ServiceHandler
     {
-        public ServiceHandler()
-        {
-            //Task.Run(ServiceInitAsync).Wait();
-        }
+        /// <summary>
+        /// Name of the Service
+        /// </summary>
+        public string Name { get; protected set; }
 
         /// <summary>
         /// Handles list of playlists
