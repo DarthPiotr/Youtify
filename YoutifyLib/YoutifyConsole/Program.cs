@@ -31,7 +31,7 @@ namespace YoutifyConsole
             var spotify = new SpotifyHandler();
             var youtube = new YouTubeHandler();
 
-            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7L8XMCxWJ9POnp7-qsgMeqV", spotify);
+            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7KoiC3IrbglUDE_SzKsWrYh", spotify);
 
             Console.WriteLine("Success: {0}\nException: {1}\nErrored tracks: {2}\n",
                 resp.Success, resp?.Exception?.Message, resp.Errors.Count);
@@ -56,7 +56,7 @@ namespace YoutifyConsole
             int i = 0;
             foreach (var e in list.Songs)
             {
-                Console.WriteLine("[{2}] {0}", e.Metadata.GetSearchString(), ++i);
+                Console.WriteLine("[{2}] {0}", e.Metadata.GetSearchString(false, true), ++i);
             }
         }
     }

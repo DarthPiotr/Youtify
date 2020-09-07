@@ -39,12 +39,12 @@ namespace YoutifyLib.Algorithm
         /// </summary>
         public string Edit          { get; set; } = "";
 
-        public string GetSearchString(bool includeExtraTitle = true)
+        public string GetSearchString(bool includeExtraTitle, bool includeCoArtist)
         {
             string search = "";
             // Remix artist is prefered to original artist
             if (string.IsNullOrEmpty(Remix))
-                search += Artist + " ";
+                search += Artist + (includeCoArtist ? " " + CoArtist + " " : " ");
             else
             {
                 var rem = Remix.Replace("remix", "").Split(Algorithm.artistDiv.ToArray(), StringSplitOptions.RemoveEmptyEntries);

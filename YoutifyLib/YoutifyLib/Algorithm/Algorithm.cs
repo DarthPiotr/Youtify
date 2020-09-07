@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -24,7 +25,7 @@ namespace YoutifyLib.Algorithm
         /// <summary>
         /// Strings that indicates "featuring" part. Without dot at the end.
         /// </summary>
-        public static List<string> featDiv          = new List<string> { "feat", "ft", "with"};
+        public static List<string> featDiv          = new List<string> { "feat", "ft" };
         /// <summary>
         /// Strings that divide artists
         /// </summary>
@@ -375,11 +376,23 @@ namespace YoutifyLib.Algorithm
             {
                 foreach (Track track in playlistFrom.Songs)
                 {
-                    string query = track.Metadata.GetSearchString();
+                    // get query and find tracks
+                    string query = track.Metadata.GetSearchString(false, true);
                     Utils.LogInfo("Searching for\"{0}\"", query);
-                    var searchResult = serviceTo.SearchForTracks(query, 1);
+                    var searchResult = serviceTo.SearchForTracks(query, 5);
+
+                    // if anything found
                     if (searchResult.Count > 0)
+                    {
+                        var s = ScoreTracks(searchResult, track);
+
                         playlistTo.Songs.Add(searchResult[0]);
+                        Utils.LogInfo(
+                            "{0}, {1} ==> {2}",
+                            track.Metadata.Title,
+                            searchResult[0].Metadata.Title,
+                            s.Values.ElementAt(0));
+                    }
                     else
                         Errors.Add(track);
                 }
@@ -511,18 +524,18 @@ namespace YoutifyLib.Algorithm
             // if it is a remix, assign to Remix property
             if (content.Contains("remix"))
             {
-                meta.Remix = content;
+                meta.Remix = content.Trim();
                 return true;
             }
             // if it is a mix, assign to Mix property
             else if (content.Contains("mix"))
             {
-                meta.Mix = content;
+                meta.Mix = content.Trim();
                 return true;
             }
             else if (content.Contains("edit"))
             {
-                meta.Edit = content;
+                meta.Edit = content.Trim();
                 return true;
             }
 
@@ -538,6 +551,40 @@ namespace YoutifyLib.Algorithm
 
             // content wasn't used to assign a property
             return false;
+        }
+    
+        private static Dictionary<Track, int> ScoreTracks(List<Track> tracks, Track original)
+        {
+            var list = new List<KeyValuePair<Track, int>>();
+            foreach(var track in tracks)
+            {
+                int score = 0;
+
+                score += Utils.ComputeLevenshteinDistance(
+                    track.   Metadata.Title.ToLower(),
+                    original.Metadata.Title.ToLower());
+                score += Utils.ComputeLevenshteinDistance(
+                    (track.   Metadata.Artist + track.   Metadata.CoArtist).ToLower(),
+                    (original.Metadata.Artist + original.Metadata.CoArtist).ToLower());
+                score += Utils.ComputeLevenshteinDistance(
+                    track.   Metadata.Mix.ToLower().Replace("mix", ""),
+                    original.Metadata.Mix.ToLower().Replace("mix", ""));
+                score += Utils.ComputeLevenshteinDistance(
+                    track.   Metadata.Remix.ToLower().Replace("remix", ""),
+                    original.Metadata.Remix.ToLower().Replace("remix", ""));
+                score += Utils.ComputeLevenshteinDistance(
+                    track.   Metadata.Edit.ToLower().Replace("edit", ""),
+                    original.Metadata.Edit.ToLower().Replace("edit", ""));
+                score += Utils.ComputeLevenshteinDistance(
+                    track.   Metadata.TitleExtra.ToLower(),
+                    original.Metadata.TitleExtra.ToLower());
+
+                list.Add(new KeyValuePair<Track, int>(track, score));
+            }
+
+            list.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+
+            return new Dictionary<Track, int>(list);
         }
     }
 }
