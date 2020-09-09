@@ -376,23 +376,57 @@ namespace YoutifyLib.Algorithm
             {
                 foreach (Track track in playlistFrom.Songs)
                 {
-                    // get query and find tracks
-                    string query = track.Metadata.GetSearchString(false, true);
-                    Utils.LogInfo("Searching for\"{0}\"", query);
-                    var searchResult = serviceTo.SearchForTracks(query, 5);
+                    string query = "";                                          // stores a query to search
+                    List<Track> searchResult;                                   // stores current search results
+                    List<KeyValuePair<Track, int>> scoredSearch;                // stores scored current search results
+                    KeyValuePair<Track, int> bestMatch                          // stores all scored search results. Should be always sorted
+                        = new KeyValuePair<Track, int>(null, int.MaxValue);
 
-                    // if anything found
-                    if (searchResult.Count > 0)
+                    for(int i = 0; i < 3; i++)
                     {
-                        var s = ScoreTracks(searchResult, track);
+                        // choose query
+                        switch (i)
+                        {
+                            case 0:
+                                // firstly, look simply for title and artist
+                                query = track.Metadata.GetSearchString(false, false);
+                                break;
+                            case 1:
+                                // on the second try, add co artist
+                                query = track.Metadata.GetSearchString(false, true);
+                                break;
+                            case 2:
+                                // on the third try, add extra title
+                                query = track.Metadata.GetSearchString(true, true);
+                                break;
+                        }
 
-                        playlistTo.Songs.Add(searchResult[0]);
-                        Utils.LogInfo(
-                            "{0}, {1} ==> {2}",
-                            track.Metadata.Title,
-                            searchResult[0].Metadata.Title,
-                            s.Values.ElementAt(0));
+                        // search 5 tracks, given the query
+                        searchResult = serviceTo.SearchForTracks(query, 5);
+
+                        // if anything was found
+                        if(searchResult.Count > 0)
+                        {
+                            // score the results
+                            scoredSearch = ScoreTracks(searchResult, track);
+
+                            //and add to the current list with sorting
+                            foreach (var item in scoredSearch)
+                            {
+                                if (item.Value < bestMatch.Value)
+                                {
+                                    bestMatch = item;
+                                    if (bestMatch.Value == 0) break;
+                                }
+                            }
+                        }
+
+                        // if there are no major differences, don't query any more
+                        if (bestMatch.Value < 10000) break;
                     }
+
+                    if (bestMatch.Key != null)
+                        playlistTo.Songs.Add(bestMatch.Key);
                     else
                         Errors.Add(track);
                 }
@@ -553,19 +587,27 @@ namespace YoutifyLib.Algorithm
             return false;
         }
     
-        private static Dictionary<Track, int> ScoreTracks(List<Track> tracks, Track original)
+        private static List<KeyValuePair<Track, int>> ScoreTracks(List<Track> tracks, Track original)
         {
             var list = new List<KeyValuePair<Track, int>>();
             foreach(var track in tracks)
             {
                 int score = 0;
 
-                score += Utils.ComputeLevenshteinDistance(
-                    track.   Metadata.Title.ToLower(),
-                    original.Metadata.Title.ToLower());
-                score += Utils.ComputeLevenshteinDistance(
-                    (track.   Metadata.Artist + track.   Metadata.CoArtist).ToLower(),
-                    (original.Metadata.Artist + original.Metadata.CoArtist).ToLower());
+                score += 10000 * ScoreVariations(
+                    track.   Metadata.Title.     ToLower(),
+                    track.   Metadata.TitleExtra.ToLower(),
+                    original.Metadata.Title.     ToLower(),
+                    original.Metadata.TitleExtra.ToLower()
+                    );
+                score += 10000 * ScoreVariations(
+                    track.   Metadata.Artist.   ToLower(),
+                    track.   Metadata.CoArtist. ToLower(),
+                    track.   Metadata.Featuring.ToLower(),
+                    original.Metadata.Artist.   ToLower(),
+                    original.Metadata.CoArtist. ToLower(),
+                    original.Metadata.Featuring.ToLower()
+                    );
                 score += Utils.ComputeLevenshteinDistance(
                     track.   Metadata.Mix.ToLower().Replace("mix", ""),
                     original.Metadata.Mix.ToLower().Replace("mix", ""));
@@ -575,16 +617,78 @@ namespace YoutifyLib.Algorithm
                 score += Utils.ComputeLevenshteinDistance(
                     track.   Metadata.Edit.ToLower().Replace("edit", ""),
                     original.Metadata.Edit.ToLower().Replace("edit", ""));
-                score += Utils.ComputeLevenshteinDistance(
+                /*score += Utils.ComputeLevenshteinDistance(
                     track.   Metadata.TitleExtra.ToLower(),
-                    original.Metadata.TitleExtra.ToLower());
+                    original.Metadata.TitleExtra.ToLower());*/
 
                 list.Add(new KeyValuePair<Track, int>(track, score));
             }
 
             list.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
 
-            return new Dictionary<Track, int>(list);
+            return new List<KeyValuePair<Track, int>>(list);
+        }
+        /// <summary>
+        /// <para>Scores two-part strings such as Title+TitleExtra</para>
+        /// <para>First part is more important than the second part</para>
+        /// </summary>
+        /// <param name="origp1">Original part 1</param>
+        /// <param name="origp2">Original part 2</param>
+        /// <param name="testp1">To test part 1</param>
+        /// <param name="testp2">To test part 2</param>
+        /// <returns>Minimum levenshtein distance</returns>
+        private static int ScoreVariations(string origp1, string origp2, string testp1, string testp2)
+        {
+            // O1 vs T1
+            int min = Utils.ComputeLevenshteinDistance(origp1, testp1);
+
+            // O1+O2 vs T1
+            int current = Utils.ComputeLevenshteinDistance(origp1+origp2, testp1);
+            if (current < min) min = current;   
+            
+            // O1 vs T1+T2
+            current = Utils.ComputeLevenshteinDistance(origp1, testp1+testp2);
+            if (current < min) min = current;  
+
+            // O1+O2 vs T1+T2
+            current = Utils.ComputeLevenshteinDistance(origp1+origp2, testp1+testp2);
+            if (current < min) min = current;             
+
+            return min;
+        }
+        /// <summary>
+        /// <para>Scores three-part strings such as Artist+CoArtist+Featuring</para>
+        /// <para>First part is more important than the second part</para>
+        /// </summary>
+        /// <param name="origp1">Original part 1</param>
+        /// <param name="origp2">Original part 2</param>
+        /// <param name="origp3">Original part 3</param>
+        /// <param name="testp1">To test part 1</param>
+        /// <param name="testp2">To test part 2</param>
+        /// <param name="testp3">To test part 3</param>
+        /// <returns>Minimum levenshtein distance</returns>
+        private static int ScoreVariations(string origp1, string origp2, string origp3, string testp1, string testp2, string testp3)
+        {
+            // O1    vs T1
+            // O1+O2 vs T1
+            // O1    vs T1+T2
+            // O1+O2 vs T1+T2
+            int min = ScoreVariations(origp1, origp2, testp1, testp2);
+
+            // O1+O2+O3 vs T1
+            int current = Utils.ComputeLevenshteinDistance(origp1 + origp2 + origp3, testp1);
+            if (current < min) min = current;
+
+            // O1+O2+O3 vs T1+T2
+            current = Utils.ComputeLevenshteinDistance(origp1 + origp2 + origp3, testp1 + testp2);
+            if (current < min) min = current;
+
+            // O1+O2+O3 vs T1+T2+T3
+            current = Utils.ComputeLevenshteinDistance(origp1 + origp2 + origp3, testp1 + testp2+ testp3);
+            if (current < min) min = current;
+
+
+            return min;
         }
     }
 }
