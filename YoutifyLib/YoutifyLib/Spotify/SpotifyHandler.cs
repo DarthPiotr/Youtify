@@ -96,8 +96,6 @@ namespace YoutifyLib.Spotify
                 case ExportType.Override:
                     RemoveFromPlaylist(playlist);
                     return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
-                case ExportType.None:
-                    return true;
             }
             return false;
         }
@@ -382,5 +380,21 @@ namespace YoutifyLib.Spotify
                 return false;
             }
 }
+        /// <summary>
+        /// Returns new empty playlist of the proper service type
+        /// </summary>
+        /// <param name="source">Source playlist to copy metedata from</param>
+        public override Playlist NewPlaylist(Playlist source = null)
+        {
+            var playlist = new SpotifyPlaylist();
+            if(source != null)
+            {
+                playlist.Title       = source.Title;
+                playlist.Description = source.Description;
+                playlist.Status      = source.Status;
+            }
+
+            return playlist;
+        }
     }
 }

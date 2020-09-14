@@ -292,8 +292,6 @@ namespace YoutifyLib.YouTube
                     case ExportType.Override:
                         RemoveFromPlaylist(playlist);
                         return ExportList(Utils.SongsToIdList(playlist.Songs), playlist.Id);
-                    case ExportType.None:
-                        return true;
                 }
                 return false;
             }
@@ -462,6 +460,23 @@ namespace YoutifyLib.YouTube
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns new empty playlist of the proper service type
+        /// </summary>
+        /// <param name="source">Source playlist to copy metedata from</param>
+        public override Playlist NewPlaylist(Playlist source = null)
+        {
+            var playlist = new YouTubePlaylist();
+            if (source != null)
+            {
+                playlist.Title = source.Title;
+                playlist.Description = source.Description;
+                playlist.Status = source.Status;
+            }
+
+            return playlist;
         }
     }
 }

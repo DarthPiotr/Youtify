@@ -11,7 +11,7 @@ namespace YoutifyLib.Algorithm
     {
         /// <summary>
         /// If the operation was successful.
-        /// Please note that with Success=true, not every track is converted
+        /// When false, check Exception
         /// </summary>
         public bool Success { get; set; } = false;
         /// <summary>
@@ -19,12 +19,34 @@ namespace YoutifyLib.Algorithm
         /// </summary>
         public Exception Exception { get; set; } = null;
         /// <summary>
-        /// A new playlist
+        /// List of tracks, with scores
         /// </summary>
-        public Playlist Playlist { get; set; } = null;
+        public List<KeyValuePair<Track,int>> Tracklist { get; set; } = null;
         /// <summary>
-        /// List of tracks that could not be converted
+        /// Returns the list of successfully converted tracks
         /// </summary>
-        public List<Track> Errors { get; set; } = new List<Track>();
+        public List<Track> GetSongs()
+        {
+            List<Track> songs = new List<Track>();
+            foreach(var track in Tracklist)
+            {
+                if (track.Value != -1)
+                    songs.Add(track.Key);
+            }
+            return songs;
+        }
+        /// <summary>
+        /// Returns the list of tracks that could not be converted
+        /// </summary>
+        public List<Track> GetErrors()
+        {
+            List<Track> errors = new List<Track>();
+            foreach (var track in Tracklist)
+            {
+                if (track.Value == -1)
+                    errors.Add(track.Key);
+            }
+            return errors;
+        }
     }
 }

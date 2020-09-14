@@ -100,9 +100,8 @@ namespace YoufityWinForms
             gbStep1.Enabled = true;
         }
 
-        private void btnBrowseInput_Click(object sender, EventArgs e)
+        private void BtnBrowseInput_Click(object sender, EventArgs e)
         {
-            int i = 0;
         }
 
         private void AddService(ServiceHandler sh)

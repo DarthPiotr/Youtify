@@ -24,18 +24,27 @@ namespace YoutifyConsole
             //  Creating/Importing Playlist and adding songs
             //
 
-            // init service and treat like generic one
+            // Init Secrets
             YoutifyConfig.YouTubeApiKey   = Secrets.YTKey;
             YoutifyConfig.SpotifyClientId = Secrets.SpotifyClientID;
+            
+            // Init services and treat like generic ones
+            ServiceHandler spotify = new SpotifyHandler();
+            ServiceHandler youtube = new YouTubeHandler();
 
-            var spotify = new SpotifyHandler();
-            var youtube = new YouTubeHandler();
+            // Import and convert playlist
+            Playlist sourcePlaylist = youtube.ImportPlaylist("PLQQAs5duqv7KoiC3IrbglUDE_SzKsWrYh");
+            ConvertResult convertionResult = Algorithm.Convert(sourcePlaylist.Songs, spotify);
 
-            var resp = Algorithm.Convert(youtube, "PLQQAs5duqv7KoiC3IrbglUDE_SzKsWrYh", spotify);
+            // Prepare new playlist
+            Playlist newPlaylist = spotify.NewPlaylist(sourcePlaylist); // Get new playlist and copy metadata
+            newPlaylist.Songs = convertionResult.GetSongs();            // Add songs that were sucessfully converted
 
-            Console.WriteLine("Success: {0}\nException: {1}\nErrored tracks: {2}\n",
-                resp.Success, resp?.Exception?.Message, resp.Errors.Count);
+            // Export playlist
+            //spotify.CreatePlaylist(ref newPlaylist);                    // Create new playlist
+            //spotify.ExportPlaylist(newPlaylist, ExportType.AddAll);     // Export tracks
 
+            
             Console.WriteLine("Test completed!");
             Console.ReadKey();
         }
@@ -49,7 +58,6 @@ namespace YoutifyConsole
                 Console.WriteLine("[{1}] {0}", e.Title, ++i);
             }
         }
-
         static void WritePlaylistContents(Playlist list)
         {
             Console.WriteLine("\n----- {0} ----", list.Title);

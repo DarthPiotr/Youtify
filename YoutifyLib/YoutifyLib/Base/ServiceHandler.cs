@@ -80,5 +80,11 @@ namespace YoutifyLib
         /// <param name="maxResults">Maximum number of results</param>
         /// <returns>List of tracks matching the query</returns>
         public abstract List<Track> SearchForTracks(string query, int maxResults = 5);
+
+        /// <summary>
+        /// Returns new empty playlist of the proper service type
+        /// </summary>
+        /// <param name="source">Source playlist to copy metedata from</param>
+        public abstract Playlist NewPlaylist(Playlist source = null);
     }
 }

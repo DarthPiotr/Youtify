@@ -242,213 +242,84 @@ namespace YoutifyLib.Algorithm
         /// <param name="playlistId">Id of the source playlist</param>
         /// <param name="serviceTo">The targeted service</param>
         /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistId, ServiceHandler serviceTo)
+        public static ConvertResult Convert(List<Track> sourcelist, ServiceHandler serviceTo)
         {
-            // make sure that input playlist is up-to-date
-            Playlist playlist = serviceFrom.ImportPlaylist(playlistId);
-            if(playlist != null)
-                return Convert(serviceFrom, playlist, serviceTo);
+            List<KeyValuePair<Track, int>> tracklist                            // output list
+                = new List<KeyValuePair<Track, int>>();
 
-            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
-            return new ConvertResult
+            foreach (Track track in sourcelist)
             {
-                Success = false,
-                Exception = new Exception("An exception occured while importing input playlist")
-            };
-        }
-        /// <summary>
-        /// Converts a playlist between services
-        /// </summary>
-        /// <param name="serviceFrom">A service that is used by source playlist</param>
-        /// <param name="playlist">Source playlist</param>
-        /// <param name="serviceTo">The targeted service</param>
-        /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlist, ServiceHandler serviceTo)
-        {
-            Playlist output = new Playlist(playlist.Title, playlist.Description);
-            try
-            {
-                // prepare new playlist
-                if (serviceTo.CreatePlaylist(ref output) == null)
-                    throw new Exception("Playlist could not be created");
-                if (!serviceTo.UpdateSnippet(output))
-                    throw new Exception("Playlist information could not be updated");
-            }
-            catch (Exception e)
-            {
-                Utils.LogError("Convert failed due to unsuccessful creation of new playlist.");
-                return new ConvertResult
+                string query = "";                                          // stores a query to search
+                List<Track> searchResult;                                   // stores current search results
+                List<KeyValuePair<Track, int>> scoredSearch;                // stores scored current search results
+                KeyValuePair<Track, int> bestMatch                          // the best scored search results.
+                    = new KeyValuePair<Track, int>(null, int.MaxValue);
+
+                for(int i = 0; i < 3; i++)
                 {
-                    Success = false,
-                    Exception = e
-                };
-            }
-
-            return Convert(serviceFrom, playlist, serviceTo, output, ExportType.AddAll);
-        }
-        /// <summary>
-        /// Converts a playlist between services
-        /// </summary>
-        /// <param name="serviceFrom">A service that is used by source playlist</param>
-        /// <param name="playlistIdFrom">Id of the source playlist</param>
-        /// <param name="serviceTo">The targeted service</param>
-        /// <param name="playlistIdTo">Id of the target playlist</param>
-        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
-        /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistIdFrom,
-            ServiceHandler serviceTo, string playlistIdTo, ExportType exportType)
-        {
-            // make sure that input playlist is up-to-date
-            Playlist playlist = serviceFrom.ImportPlaylist(playlistIdFrom);
-            if (playlist != null)
-                return Convert(serviceFrom, playlist, serviceTo, playlistIdTo, exportType);
-
-            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
-            return new ConvertResult
-            {
-                Success = false,
-                Exception = new Exception("An exception occured while importing input playlist")
-            };
-        }
-        /// <summary>
-        /// Converts a playlist between services
-        /// </summary>
-        /// <param name="serviceFrom">A service that is used by source playlist</param>
-        /// <param name="playlistIdFrom">Id of the source playlist</param>
-        /// <param name="serviceTo">The targeted service</param>
-        /// <param name="playlistTo">Target playlist</param>
-        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
-        /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, string playlistIdFrom,
-            ServiceHandler serviceTo, Playlist playlistTo, ExportType exportType = ExportType.None)
-        {
-            // make sure that input playlist is up-to-date
-            Playlist playlist = serviceFrom.ImportPlaylist(playlistIdFrom);
-            if (playlist != null)
-                return Convert(serviceFrom, playlist, serviceTo, playlistTo, exportType);
-
-            Utils.LogError("Convert failed due to unsuccessful input playlist import.");
-            return new ConvertResult
-            {
-                Success = false,
-                Exception = new Exception("An exception occured while importing input playlist")
-            };
-        }
-        /// <summary>
-        /// Converts a playlist between services
-        /// </summary>
-        /// <param name="serviceFrom">A service that is used by source playlist</param>
-        /// <param name="playlistFrom">Source playlist</param>
-        /// <param name="serviceTo">The targeted service</param>
-        /// <param name="playlistIdTo">Id of the target playlist</param>
-        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
-        /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlistFrom,
-            ServiceHandler serviceTo, string playlistIdTo, ExportType exportType)
-        {
-            // make sure that outpul playlist is up-to-date
-            Playlist playlist = serviceTo.ImportPlaylist(playlistIdTo);
-            if (playlist != null)
-                return Convert(serviceFrom, playlistFrom, serviceTo, playlist, exportType);
-
-            Utils.LogError("Convert failed due to unsuccessful output playlist import.");
-            return new ConvertResult
-            {
-                Success = false,
-                Exception = new Exception("An exception occured while importing output playlist")
-            };
-        }
-        /// <summary>
-        /// Converts a playlist between services
-        /// </summary>
-        /// <param name="serviceFrom">A service that is used by source playlist</param>
-        /// <param name="playlistFrom">Source playlist</param>
-        /// <param name="serviceTo">The targeted service</param>
-        /// <param name="playlistTo">Target playlist</param>
-        /// <param name="exportType">Type of exporting tracks to the target playlist</param>
-        /// <returns>An instance of Convert Result</returns>
-        public static ConvertResult Convert(ServiceHandler serviceFrom, Playlist playlistFrom,
-            ServiceHandler serviceTo, Playlist playlistTo, ExportType exportType = ExportType.None)
-        {
-            List<Track> Errors = new List<Track>();
-
-            try
-            {
-                foreach (Track track in playlistFrom.Songs)
-                {
-                    string query = "";                                          // stores a query to search
-                    List<Track> searchResult;                                   // stores current search results
-                    List<KeyValuePair<Track, int>> scoredSearch;                // stores scored current search results
-                    KeyValuePair<Track, int> bestMatch                          // stores all scored search results. Should be always sorted
-                        = new KeyValuePair<Track, int>(null, int.MaxValue);
-
-                    for(int i = 0; i < 3; i++)
+                    // choose query
+                    switch (i)
                     {
-                        // choose query
-                        switch (i)
-                        {
-                            case 0:
-                                // firstly, look simply for title and artist
-                                query = track.Metadata.GetSearchString(false, false);
-                                break;
-                            case 1:
-                                // on the second try, add co artist
-                                query = track.Metadata.GetSearchString(false, true);
-                                break;
-                            case 2:
-                                // on the third try, add extra title
-                                query = track.Metadata.GetSearchString(true, true);
-                                break;
-                        }
-
-                        // search 5 tracks, given the query
-                        searchResult = serviceTo.SearchForTracks(query, 5);
-
-                        // if anything was found
-                        if(searchResult.Count > 0)
-                        {
-                            // score the results
-                            scoredSearch = ScoreTracks(searchResult, track);
-
-                            //and add to the current list with sorting
-                            foreach (var item in scoredSearch)
-                            {
-                                if (item.Value < bestMatch.Value)
-                                {
-                                    bestMatch = item;
-                                    if (bestMatch.Value == 0) break;
-                                }
-                            }
-                        }
-
-                        // if there are no major differences, don't query any more
-                        if (bestMatch.Value < 10000) break;
+                        case 0:
+                            // firstly, look simply for title and artist
+                            query = track.Metadata.GetSearchString(false, false);
+                            break;
+                        case 1:
+                            // on the second try, add co artist
+                            query = track.Metadata.GetSearchString(false, true);
+                            break;
+                        case 2:
+                            // on the third try, add extra title
+                            query = track.Metadata.GetSearchString(true, true);
+                            break;
                     }
 
-                    if (bestMatch.Key != null)
-                        playlistTo.Songs.Add(bestMatch.Key);
-                    else
-                        Errors.Add(track);
+                try { 
+                    // search 5 tracks, given the query
+                    searchResult = serviceTo.SearchForTracks(query, 5);
+                }
+                catch (Exception e)
+                {
+                    Utils.LogError("During conversion: {0}, {1}", e.Message, e.InnerException);
+                    return new ConvertResult
+                    {
+                        Success = false,
+                        Exception = e
+                    };
                 }
 
-                if (!serviceTo.ExportPlaylist(playlistTo, exportType))
-                    throw new Exception("Playlist could not be exported");
-            }
-            catch (Exception e)
-            {
-                Utils.LogError("During conversion: {0}, {1}", e.Message, e.InnerException);
-                return new ConvertResult
-                {
-                    Success = false,
-                    Exception = e
-                };
-            }
+                // if anything was found
+                if (searchResult.Count > 0)
+                    {
+                        // score the results
+                        scoredSearch = ScoreTracks(searchResult, track);
+
+                        //and add to the current list with sorting
+                        foreach (var item in scoredSearch)
+                        {
+                            if (item.Value < bestMatch.Value)
+                            {
+                                bestMatch = item;
+                                if (bestMatch.Value == 0) break;
+                            }
+                        }
+                    }
+
+                    // if there are no major differences, don't query any more
+                    if (bestMatch.Value < 10000) break;
+                }
+
+                // add the best match to the list
+                tracklist.Add(new KeyValuePair<Track, int>(
+                    bestMatch.Key ?? new Track() { Metadata = track.Metadata },
+                    ScoreToPercent(bestMatch)
+                    ));
+            }            
 
             return new ConvertResult
             {
                 Success = true,
-                Playlist = playlistTo,
-                Errors = Errors
+                Tracklist = tracklist
             };
         }
         
@@ -587,6 +458,12 @@ namespace YoutifyLib.Algorithm
             return false;
         }
     
+        /// <summary>
+        /// Scores track's similarity to original
+        /// </summary>
+        /// <param name="tracks">Track to be scored</param>
+        /// <param name="original">Original track</param>
+        /// <returns></returns>
         private static List<KeyValuePair<Track, int>> ScoreTracks(List<Track> tracks, Track original)
         {
             var list = new List<KeyValuePair<Track, int>>();
@@ -689,6 +566,22 @@ namespace YoutifyLib.Algorithm
 
 
             return min;
+        }
+        /// <summary>
+        /// Converts Algorithm's internal scoring system to readable percentage score
+        /// </summary>
+        /// <param name="entry">Key Value pair to convert the score from</param>
+        /// <returns>Score of similarity in percents: 100-the same, 0-totally different</returns>
+        private static int ScoreToPercent(KeyValuePair<Track, int> entry)
+        {
+            if (entry.Key == null)
+                return -1;
+            
+            var meta   = entry.Key.Metadata;    // metadata short reference
+            int score  = entry.Value/10000 + entry.Value%10000; // current score without importance space
+            int length = (meta.Title + meta.TitleExtra + meta.Mix + meta.Remix + meta.Edit + meta.Artist + meta.CoArtist).Length; // length of the full thing
+
+            return (int)(Math.Max((float)length - score, 0.0f) * 100) / length;
         }
     }
 }

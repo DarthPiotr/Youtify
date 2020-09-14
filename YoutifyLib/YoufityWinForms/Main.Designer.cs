@@ -128,7 +128,7 @@
             this.btnBrowseInput.TabIndex = 5;
             this.btnBrowseInput.Text = "Browse playlists (unavailable)";
             this.btnBrowseInput.UseVisualStyleBackColor = true;
-            this.btnBrowseInput.Click += new System.EventHandler(this.btnBrowseInput_Click);
+            this.btnBrowseInput.Click += new System.EventHandler(this.BtnBrowseInput_Click);
             // 
             // btnSelectInputUrl
             // 
