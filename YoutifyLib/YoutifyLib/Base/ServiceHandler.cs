@@ -15,11 +15,6 @@ namespace YoutifyLib
         public string Name { get; protected set; }
 
         /// <summary>
-        /// Handles list of playlists
-        /// </summary>
-        public PlaylistsHandler PlaylistsPage;
-
-        /// <summary>
         /// Initlialize required service components async. Should be properly implemented in child classes.
         /// </summary>
         /// <returns>Async task</returns>
@@ -80,6 +75,8 @@ namespace YoutifyLib
         /// <param name="maxResults">Maximum number of results</param>
         /// <returns>List of tracks matching the query</returns>
         public abstract List<Track> SearchForTracks(string query, int maxResults = 5);
+
+        public abstract List<Playlist> SearchForMyPlaylists(int maxResults = 0);
 
         /// <summary>
         /// Returns new empty playlist of the proper service type

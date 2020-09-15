@@ -12,6 +12,14 @@ namespace YoutifyLib.YouTube
     {
         public YouTubePlaylist() { }
 
+        public YouTubePlaylist(Google.Apis.YouTube.v3.Data.Playlist playlist)
+        {
+            Title = playlist.Snippet.Title;
+            Description = playlist.Snippet.Description;
+            Id = playlist.Id;
+            Status = playlist.Status.PrivacyStatus;
+        }
+
         public YouTubePlaylist(string title, string description, string id, string status = "public")
             : base(title, description, status)
         {

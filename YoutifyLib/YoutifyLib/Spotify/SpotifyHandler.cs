@@ -200,6 +200,51 @@ namespace YoutifyLib.Spotify
 
             return list;
         }
+
+        public override List<Playlist> SearchForMyPlaylists(int maxResults = 0)
+        {
+            List<Playlist> list = new List<Playlist>();
+            int offset = 0;
+            int page = 20;
+            var next = "";
+
+            if (maxResults <= 0)
+                maxResults = int.MaxValue;
+           
+            try
+            {
+                while (next != null && maxResults > 0)
+                {
+                    int limit = 0;
+                    if (maxResults / page >= 1)
+                        limit = page;
+                    else
+                        limit = maxResults;
+
+                    var req = Service.Playlists.CurrentUsers(new PlaylistCurrentUsersRequest() {
+                        Limit = limit,
+                        Offset = offset
+                    });
+                    req.Wait();
+                    next = req.Result.Next;
+                
+
+                    foreach (var playlist in req.Result.Items)
+                        list.Add(new SpotifyPlaylist(playlist));
+
+                    offset += limit;
+                    maxResults -= page;
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While searching for tracks: {0}, {1}", e.Message, e.InnerException);
+                return null;
+            }
+
+            return list;
+        }
+
         /// <summary>
         /// Updates snippet, that is title, description and privacy status of playlist
         /// </summary>

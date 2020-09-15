@@ -26,7 +26,6 @@ namespace YoutifyLib.YouTube
             Name = "YouTube";
             if (Service == null)
                 Task.Run(ServiceInitAsync).Wait();
-            PlaylistsPage = new YouTubePlaylistsHandler(Service);
         }
 
         /// <summary>
@@ -444,6 +443,51 @@ namespace YoutifyLib.YouTube
             }
 
             return playlist;
+        }
+
+        public override List<Playlist> SearchForMyPlaylists(int maxResults = 0)
+        {
+            List<Playlist> list = new List<Playlist>();
+            int page = 20;
+            if (maxResults <= 0)
+                maxResults = int.MaxValue;
+
+            var pageToken = "";
+            var request = Service.Playlists.List("id, snippet, status");
+            request.Mine = true;
+
+            try
+            {
+                while (pageToken != null && maxResults > 0)
+                {
+                    if (maxResults / page >= 1)
+                        request.MaxResults = maxResults;
+                    else
+                        request.MaxResults = maxResults;
+
+                    request.PageToken = pageToken;
+
+                    var task = Task.Run(async () =>
+                    {
+                        var result = await request.ExecuteAsync();
+                        return result;
+                    });
+                    task.Wait();
+
+                    pageToken = task.Result.NextPageToken;
+
+                    foreach (var playlist in task.Result.Items)
+                        list.Add(new YouTubePlaylist(playlist));
+
+                    maxResults -= (int)request.MaxResults;
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.LogError("While searching for User's YouTube playlists: {0}, {1}", e.Message, e.InnerException.Message);
+            }
+
+            return list;
         }
     }
 }
