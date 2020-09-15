@@ -49,6 +49,7 @@ namespace YoutifyConsole
             Console.ReadKey();
         }
 
+#pragma warning disable IDE0051 // Remove unused private members
         static void WritePlaylists(IList list)
         {
             Console.WriteLine("\n----- Writing page: ----");
@@ -67,5 +68,6 @@ namespace YoutifyConsole
                 Console.WriteLine("[{2}] {0}", e.Metadata.GetSearchString(false, true), ++i);
             }
         }
+#pragma warning restore IDE0051
     }
 }

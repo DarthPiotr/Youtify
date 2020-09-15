@@ -300,40 +300,7 @@ namespace YoutifyLib.YouTube
                 Utils.LogError("While exporting playlist: {0}, {1}", e.Message, e.InnerException);
                 return false;
             }
-        }
-        /// <summary>
-        /// Adds every song from Songs property to playlist
-        /// </summary>
-        /// <param name="playlist">Playlist to be exported</param>
-        /// <returns>if the operation was successful</returns>
-        private bool ExportList(YouTubePlaylist playlist)
-        {
-            foreach (YouTubeTrack song in playlist.Songs)
-            {
-                try
-                {
-                    var request = Task.Run(() =>
-                    {
-
-                        var pli = song.ToPlaylistItem(playlist.Id);
-                        pli.Snippet.PlaylistId = playlist.Id;
-
-                        var req = Service.PlaylistItems.Insert(pli, "snippet");
-                        var res = req.ExecuteAsync();
-
-                        return res.Result;
-                    });
-                    request.Wait();
-                }
-                catch (Exception e)
-                {
-                    Utils.LogError("An error occured while exporting tracks. {0}, {1}", e.Message, e.InnerException);
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        }        
         /// <summary>
         /// Adds every id to the playlist
         /// </summary>
