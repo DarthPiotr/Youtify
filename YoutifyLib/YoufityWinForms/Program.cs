@@ -22,8 +22,10 @@ namespace YoufityWinForms
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            YoutifyConfig.YouTubeApiKey = Secrets.YTKey;
-            YoutifyConfig.SpotifyClientId = Secrets.SpotifyClientID;
+            YoutifyConfig.YouTubeApiKey = Secrets.YouTubeKey;
+            YoutifyConfig.YouTubeClientId = Secrets.YouTubeClientId;
+            YoutifyConfig.YouTubeClientSecret = Secrets.YouTubeClientSecret;
+            YoutifyConfig.SpotifyClientId = Secrets.SpotifyClientId;
 
             Application.Run(new Main());
 

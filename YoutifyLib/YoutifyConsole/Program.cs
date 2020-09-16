@@ -25,9 +25,11 @@ namespace YoutifyConsole
             //
 
             // Init Secrets
-            YoutifyConfig.YouTubeApiKey   = Secrets.YTKey;
-            YoutifyConfig.SpotifyClientId = Secrets.SpotifyClientID;
-            
+            YoutifyConfig.YouTubeApiKey       = Secrets.YouTubeKey;
+            YoutifyConfig.YouTubeClientId     = Secrets.YouTubeClientId;
+            YoutifyConfig.YouTubeClientSecret = Secrets.YouTubeClientSecret;
+            YoutifyConfig.SpotifyClientId     = Secrets.SpotifyClientId;
+
             // Init services and treat like generic ones
             ServiceHandler spotify = new SpotifyHandler();
             ServiceHandler youtube = new YouTubeHandler();
@@ -44,7 +46,7 @@ namespace YoutifyConsole
             //spotify.CreatePlaylist(ref newPlaylist);                    // Create new playlist
             //spotify.ExportPlaylist(newPlaylist, ExportType.AddAll);     // Export tracks
 
-            
+
             Console.WriteLine("Test completed!");
             Console.ReadKey();
         }
