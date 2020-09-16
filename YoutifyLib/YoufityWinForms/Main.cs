@@ -22,7 +22,7 @@ namespace YoufityWinForms
             get => playlistid;
             set
             {
-                labSelectedId.Text = "Selected id: " + value;
+                labSelectedIdInput.Text = "Selected id: " + value;
                 playlistid = value;
             }
         }
@@ -76,11 +76,7 @@ namespace YoufityWinForms
         /// </summary>
         private void BtnBrowse_Click(object sender, EventArgs e)
         {
-            gbStep1.Enabled = false;
-
-            var serv = Services[lbServices.SelectedIndex];
-
-            gbStep1.Enabled = true;
+            
         }
 
         private void BtnSelectInputUrl_Click(object sender, EventArgs e)
