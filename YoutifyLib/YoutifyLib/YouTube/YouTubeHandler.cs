@@ -5,7 +5,6 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,25 +31,24 @@ namespace YoutifyLib.YouTube
         /// Setting up YouTube Service with API key and OAuth. Used in constructor.
         /// </summary>
         /// <returns>Task to setup YT Service</returns>
+
         protected override async Task ServiceInitAsync()
         {
             Utils.LogInfo("Initializing service...");
-            try
-            {
+            try {
                 // OAuth 
-                UserCredential credential;
-                using (var stream = new FileStream(YoutifyConfig.YouTubeClientSecretFile, FileMode.Open, FileAccess.Read))
-                {
-                    credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                        GoogleClientSecrets.Load(stream).Secrets,
-                        // This OAuth 2.0 access scope allows for full read/write access to the
-                        // authenticated user's account.
-                        new[] { YouTubeService.Scope.Youtube },
-                        "user",
-                        CancellationToken.None,
-                        new FileDataStore(this.GetType().ToString())
-                    );
-                }
+                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    new ClientSecrets() {
+                        ClientId = YoutifyConfig.YouTubeClientId,
+                        ClientSecret = YoutifyConfig.YouTubeClientSecret
+                    },
+                    // This OAuth 2.0 access scope allows for full read/write access to the
+                    // authenticated user's account.
+                    new[] { YouTubeService.Scope.Youtube },
+                    "user",
+                    CancellationToken.None,
+                    new FileDataStore(this.GetType().ToString())
+                );
 
                 // Google YouTube API Service
                 Service = new YouTubeService(new BaseClientService.Initializer()
@@ -67,6 +65,8 @@ namespace YoutifyLib.YouTube
             }
             Utils.LogInfo("Initializing service done!");
         }
+
+
         /// <summary>
         /// Returns id of a channel, without UC prefix.
         /// </summary>

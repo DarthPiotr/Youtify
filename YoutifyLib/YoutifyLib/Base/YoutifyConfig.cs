@@ -12,19 +12,24 @@ namespace YoutifyLib
         /// https://developers.google.com/youtube/v3/getting-started
         /// </summary>
         public static string YouTubeApiKey   { internal get; set; }
-
         /// <summary>
-        /// Name of YouTube Client Secret file, for OAuth
+        /// Youtube Client Id
+        /// Get yourself one here:
+        /// https://developers.google.com/youtube/v3/getting-started
         /// </summary>
-        public static string YouTubeClientSecretFile { internal get; set; } = "client_secrets.json";
-
+        public static string YouTubeClientId { internal get; set; }
+        /// <summary>
+        /// Youtube Client Secret
+        /// Get yourself one here:
+        /// https://developers.google.com/youtube/v3/getting-started
+        /// </summary>
+        public static string YouTubeClientSecret { internal get; set; }
         /// <summary>
         /// Spotify Client Id
         /// Get yourself one here: 
         /// https://developer.spotify.com/documentation/general/guides/app-settings/
         /// </summary>
         public static string SpotifyClientId { internal get; set; }
-
         /// <summary>
         /// Specifies the path to file where access token is stored.
         /// </summary>

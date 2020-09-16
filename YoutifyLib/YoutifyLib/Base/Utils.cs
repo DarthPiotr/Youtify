@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace YoutifyLib
@@ -91,6 +92,28 @@ namespace YoutifyLib
                 list.Add(ytt.ID);
 
             return list;
+        }
+
+        /// <summary>
+        /// <para>Opens provided uri with browser.</para>
+        /// <para>Based on <see href="https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/SpotifyAPI.Web.Auth/BrowserUtil.cs"/></para>
+        /// </summary>
+        /// <param name="uri"></param>
+        public static void OpenInBrowser(string uri)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                uri = uri.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo($"cmd", $"/c start {uri}"));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", uri);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", uri);
+            }
         }
     }
 }

@@ -3,7 +3,6 @@ using SpotifyAPI.Web.Auth;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Threading;
 using System.IO;
 using Newtonsoft.Json;
 
