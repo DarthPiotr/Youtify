@@ -37,10 +37,18 @@
             this.cbSourceService = new System.Windows.Forms.ComboBox();
             this.btnBrowseInput = new System.Windows.Forms.Button();
             this.btnSelectInputUrl = new System.Windows.Forms.Button();
-            this.labSelectedId = new System.Windows.Forms.Label();
-            this.labSelectedService = new System.Windows.Forms.Label();
+            this.labSelectedIdInput = new System.Windows.Forms.Label();
+            this.labSelectedServiceInput = new System.Windows.Forms.Label();
+            this.gbStep3 = new System.Windows.Forms.GroupBox();
+            this.cbTargetService = new System.Windows.Forms.ComboBox();
+            this.btnBrowseOutput = new System.Windows.Forms.Button();
+            this.btnSelectOutputUrl = new System.Windows.Forms.Button();
+            this.labSelectedIdOutput = new System.Windows.Forms.Label();
+            this.labSelectedServiceOutput = new System.Windows.Forms.Label();
+            this.btnNewOutput = new System.Windows.Forms.Button();
             this.gbStep1.SuspendLayout();
             this.gbStep2.SuspendLayout();
+            this.gbStep3.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbServices
@@ -101,8 +109,8 @@
             this.gbStep2.Controls.Add(this.cbSourceService);
             this.gbStep2.Controls.Add(this.btnBrowseInput);
             this.gbStep2.Controls.Add(this.btnSelectInputUrl);
-            this.gbStep2.Controls.Add(this.labSelectedId);
-            this.gbStep2.Controls.Add(this.labSelectedService);
+            this.gbStep2.Controls.Add(this.labSelectedIdInput);
+            this.gbStep2.Controls.Add(this.labSelectedServiceInput);
             this.gbStep2.Location = new System.Drawing.Point(272, 13);
             this.gbStep2.Name = "gbStep2";
             this.gbStep2.Size = new System.Drawing.Size(346, 157);
@@ -140,29 +148,105 @@
             this.btnSelectInputUrl.UseVisualStyleBackColor = true;
             this.btnSelectInputUrl.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
             // 
-            // labSelectedId
+            // labSelectedIdInput
             // 
-            this.labSelectedId.AutoSize = true;
-            this.labSelectedId.Location = new System.Drawing.Point(18, 60);
-            this.labSelectedId.Name = "labSelectedId";
-            this.labSelectedId.Size = new System.Drawing.Size(86, 20);
-            this.labSelectedId.TabIndex = 2;
-            this.labSelectedId.Text = "Selected id:";
+            this.labSelectedIdInput.AutoSize = true;
+            this.labSelectedIdInput.Location = new System.Drawing.Point(18, 60);
+            this.labSelectedIdInput.Name = "labSelectedIdInput";
+            this.labSelectedIdInput.Size = new System.Drawing.Size(86, 20);
+            this.labSelectedIdInput.TabIndex = 2;
+            this.labSelectedIdInput.Text = "Selected id:";
             // 
-            // labSelectedService
+            // labSelectedServiceInput
             // 
-            this.labSelectedService.AutoSize = true;
-            this.labSelectedService.Location = new System.Drawing.Point(18, 32);
-            this.labSelectedService.Name = "labSelectedService";
-            this.labSelectedService.Size = new System.Drawing.Size(59, 20);
-            this.labSelectedService.TabIndex = 1;
-            this.labSelectedService.Text = "Service:";
+            this.labSelectedServiceInput.AutoSize = true;
+            this.labSelectedServiceInput.Location = new System.Drawing.Point(18, 32);
+            this.labSelectedServiceInput.Name = "labSelectedServiceInput";
+            this.labSelectedServiceInput.Size = new System.Drawing.Size(59, 20);
+            this.labSelectedServiceInput.TabIndex = 1;
+            this.labSelectedServiceInput.Text = "Service:";
+            // 
+            // gbStep3
+            // 
+            this.gbStep3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.gbStep3.Controls.Add(this.cbTargetService);
+            this.gbStep3.Controls.Add(this.btnBrowseOutput);
+            this.gbStep3.Controls.Add(this.btnNewOutput);
+            this.gbStep3.Controls.Add(this.btnSelectOutputUrl);
+            this.gbStep3.Controls.Add(this.labSelectedIdOutput);
+            this.gbStep3.Controls.Add(this.labSelectedServiceOutput);
+            this.gbStep3.Location = new System.Drawing.Point(272, 184);
+            this.gbStep3.Name = "gbStep3";
+            this.gbStep3.Size = new System.Drawing.Size(346, 157);
+            this.gbStep3.TabIndex = 3;
+            this.gbStep3.TabStop = false;
+            this.gbStep3.Text = "Step 3: Select target playlist";
+            // 
+            // cbTargetService
+            // 
+            this.cbTargetService.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbTargetService.FormattingEnabled = true;
+            this.cbTargetService.Location = new System.Drawing.Point(83, 29);
+            this.cbTargetService.Name = "cbTargetService";
+            this.cbTargetService.Size = new System.Drawing.Size(238, 28);
+            this.cbTargetService.TabIndex = 3;
+            this.cbTargetService.SelectedIndexChanged += new System.EventHandler(this.CbSourceService_SelectedIndexChanged);
+            // 
+            // btnBrowseOutput
+            // 
+            this.btnBrowseOutput.Location = new System.Drawing.Point(100, 87);
+            this.btnBrowseOutput.Name = "btnBrowseOutput";
+            this.btnBrowseOutput.Size = new System.Drawing.Size(129, 58);
+            this.btnBrowseOutput.TabIndex = 5;
+            this.btnBrowseOutput.Text = "Browse playlists (unavailable)";
+            this.btnBrowseOutput.UseVisualStyleBackColor = true;
+            this.btnBrowseOutput.Click += new System.EventHandler(this.BtnBrowseInput_Click);
+            // 
+            // btnSelectOutputUrl
+            // 
+            this.btnSelectOutputUrl.Location = new System.Drawing.Point(6, 87);
+            this.btnSelectOutputUrl.Name = "btnSelectOutputUrl";
+            this.btnSelectOutputUrl.Size = new System.Drawing.Size(88, 58);
+            this.btnSelectOutputUrl.TabIndex = 4;
+            this.btnSelectOutputUrl.Text = "Select Url";
+            this.btnSelectOutputUrl.UseVisualStyleBackColor = true;
+            this.btnSelectOutputUrl.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
+            // 
+            // labSelectedIdOutput
+            // 
+            this.labSelectedIdOutput.AutoSize = true;
+            this.labSelectedIdOutput.Location = new System.Drawing.Point(18, 60);
+            this.labSelectedIdOutput.Name = "labSelectedIdOutput";
+            this.labSelectedIdOutput.Size = new System.Drawing.Size(86, 20);
+            this.labSelectedIdOutput.TabIndex = 2;
+            this.labSelectedIdOutput.Text = "Selected id:";
+            // 
+            // labSelectedServiceOutput
+            // 
+            this.labSelectedServiceOutput.AutoSize = true;
+            this.labSelectedServiceOutput.Location = new System.Drawing.Point(18, 32);
+            this.labSelectedServiceOutput.Name = "labSelectedServiceOutput";
+            this.labSelectedServiceOutput.Size = new System.Drawing.Size(59, 20);
+            this.labSelectedServiceOutput.TabIndex = 1;
+            this.labSelectedServiceOutput.Text = "Service:";
+            // 
+            // btnNewOutput
+            // 
+            this.btnNewOutput.Location = new System.Drawing.Point(235, 87);
+            this.btnNewOutput.Name = "btnNewOutput";
+            this.btnNewOutput.Size = new System.Drawing.Size(88, 58);
+            this.btnNewOutput.TabIndex = 4;
+            this.btnNewOutput.Text = "Create new";
+            this.btnNewOutput.UseVisualStyleBackColor = true;
+            this.btnNewOutput.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(634, 409);
+            this.Controls.Add(this.gbStep3);
             this.Controls.Add(this.gbStep2);
             this.Controls.Add(this.gbStep1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -172,6 +256,8 @@
             this.gbStep1.ResumeLayout(false);
             this.gbStep2.ResumeLayout(false);
             this.gbStep2.PerformLayout();
+            this.gbStep3.ResumeLayout(false);
+            this.gbStep3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -183,11 +269,18 @@
         private System.Windows.Forms.Button btnDelService;
         private System.Windows.Forms.GroupBox gbStep1;
         private System.Windows.Forms.GroupBox gbStep2;
-        private System.Windows.Forms.Label labSelectedService;
-        private System.Windows.Forms.Label labSelectedId;
+        private System.Windows.Forms.Label labSelectedServiceInput;
+        private System.Windows.Forms.Label labSelectedIdInput;
         private System.Windows.Forms.Button btnSelectInputUrl;
         private System.Windows.Forms.Button btnBrowseInput;
         private System.Windows.Forms.ComboBox cbSourceService;
+        private System.Windows.Forms.GroupBox gbStep3;
+        private System.Windows.Forms.ComboBox cbTargetService;
+        private System.Windows.Forms.Button btnBrowseOutput;
+        private System.Windows.Forms.Button btnSelectOutputUrl;
+        private System.Windows.Forms.Label labSelectedIdOutput;
+        private System.Windows.Forms.Label labSelectedServiceOutput;
+        private System.Windows.Forms.Button btnNewOutput;
     }
 }
 
