@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoutifyLib;
 
@@ -33,8 +34,12 @@ namespace YoufityWinForms
         /// <summary>
         /// Searching for Url
         /// </summary>
-        private void BtnSearchUrl_Click(object sender, EventArgs e)
+        private async void BtnSearchUrl_Click(object sender, EventArgs e)
         {
+            tbUrl.Enabled =
+            btnCancel.Enabled =
+            btnSelect.Enabled =
+            btnSearch.Enabled = false;
 
             var id = tbUrl.Text;
             // ugly, I know
@@ -64,7 +69,12 @@ namespace YoufityWinForms
             }
 
             labId.Text = id;
-            var plinfo = service.ImportPlaylist(id, true);
+            Playlist plinfo = null;
+
+            Task task = new Task(() => { plinfo = service.ImportPlaylist(id, true); });
+            task.Start();
+            await task;
+
             if (plinfo == null)
             {
                 Id = "";
@@ -77,6 +87,11 @@ namespace YoufityWinForms
                 labTitle.Text = plinfo.Title;
                 labDescription.Text = plinfo.Description;
             }
+
+            tbUrl.Enabled =
+            btnCancel.Enabled =
+            btnSelect.Enabled =
+            btnSearch.Enabled = true;
         }
 
         private void btnSelect_Click(object sender, EventArgs e)

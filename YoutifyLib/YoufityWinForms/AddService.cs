@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using YoutifyLib;
 using YoutifyLib.Spotify;
@@ -23,20 +24,32 @@ namespace YoufityWinForms
             Service = null;
         }
 
-        private void BtnAdd_Click(object sender, EventArgs e)
+        private async void BtnAdd_Click(object sender, EventArgs e)
         {
+            pbAdd.Style = ProgressBarStyle.Marquee;
+            lbServices.Enabled = btnAdd.Enabled = false;
+
+            Task task;
             switch (lbServices.SelectedIndex)
             {
                 case 0:
-                    Service = new YouTubeHandler();
+                    task = new Task(() => { Service = new YouTubeHandler(); });
+                    task.Start();
+                    await task;
                     break;
                 case 1:
-                    Service = new SpotifyHandler();
+                    task = new Task(() => { Service = new SpotifyHandler(); });
+                    task.Start();
+                    await task;
                     break;
                 default:
                     MessageBox.Show("Select service first!", "Invalid service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
             }
+
+            lbServices.Enabled = btnAdd.Enabled = true;
+            pbAdd.Style = ProgressBarStyle.Continuous;
+
             this.Close();
         }
     }

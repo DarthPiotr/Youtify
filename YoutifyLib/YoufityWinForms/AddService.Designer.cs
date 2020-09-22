@@ -30,15 +30,17 @@
         {
             this.lbServices = new System.Windows.Forms.ListBox();
             this.btnAdd = new System.Windows.Forms.Button();
+            this.pbAdd = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // lbServices
             // 
             this.lbServices.FormattingEnabled = true;
+            this.lbServices.IntegralHeight = false;
             this.lbServices.ItemHeight = 20;
             this.lbServices.Location = new System.Drawing.Point(30, 23);
             this.lbServices.Name = "lbServices";
-            this.lbServices.Size = new System.Drawing.Size(241, 224);
+            this.lbServices.Size = new System.Drawing.Size(241, 193);
             this.lbServices.TabIndex = 0;
             // 
             // btnAdd
@@ -51,11 +53,19 @@
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.BtnAdd_Click);
             // 
+            // pbAdd
+            // 
+            this.pbAdd.Location = new System.Drawing.Point(30, 222);
+            this.pbAdd.Name = "pbAdd";
+            this.pbAdd.Size = new System.Drawing.Size(241, 33);
+            this.pbAdd.TabIndex = 2;
+            // 
             // AddService
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(308, 327);
+            this.Controls.Add(this.pbAdd);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.lbServices);
             this.MaximizeBox = false;
@@ -73,5 +83,6 @@
 
         private System.Windows.Forms.ListBox lbServices;
         private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.ProgressBar pbAdd;
     }
 }

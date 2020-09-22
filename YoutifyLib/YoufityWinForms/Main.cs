@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Google.Apis.Util;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -17,16 +19,16 @@ namespace YoufityWinForms
     public partial class Main : Form
     {
         private List<ServiceRole> Services { get; set; }
-        private string PlaylistId
+        private string SourceId
         {
-            get => playlistid;
+            get => sourceid;
             set
             {
                 labSelectedIdInput.Text = "Selected id: " + value;
-                playlistid = value;
+                sourceid = value;
             }
         }
-        private string playlistid;
+        private string sourceid;
 
         public Main()
         {
@@ -34,6 +36,7 @@ namespace YoufityWinForms
             Services = new List<ServiceRole>();
             
             btnSelectInputUrl.Enabled = false;
+            btnBrowseInput.Enabled = false;
             btnDelService.Enabled = false;
         }
         /// <summary>
@@ -61,7 +64,7 @@ namespace YoufityWinForms
             if (lbServices.SelectedIndex >= 0 && lbServices .SelectedIndex <= Services.Count)
             {
                 RemoveServiceAt(lbServices.SelectedIndex);
-                PlaylistId = "";
+                SourceId = "";
             }
         }
         /// <summary>
@@ -71,33 +74,21 @@ namespace YoufityWinForms
         {
             btnDelService.Enabled = lbServices.SelectedIndex != -1;
         }
-        /// <summary>
-        /// Browsing user playlists
-        /// </summary>
-        private void BtnBrowse_Click(object sender, EventArgs e)
-        {
-            
-        }
 
         private void BtnSelectInputUrl_Click(object sender, EventArgs e)
         {
-            gbStep1.Enabled = false;
-
-            var selUrl = new SelectUrl(Services[lbServices.SelectedIndex].Service);
-
-            selUrl.FormClosed += (s, e) =>
-            {
-                var urlwin = s as SelectUrl;
-                PlaylistId = urlwin.Id;
-            };
-
+            var selUrl = new SelectUrl(Services[cbSourceService.SelectedIndex].Service);
             selUrl.ShowDialog();
 
-            gbStep1.Enabled = true;
+            SourceId = selUrl.Id;
         }
 
         private void BtnBrowseInput_Click(object sender, EventArgs e)
         {
+            var browsePlaylists = new BrowsePlaylists(Services[cbSourceService.SelectedIndex].Service);
+            browsePlaylists.ShowDialog();
+
+            SourceId = browsePlaylists.SelectedPlaylist.Id;
         }
 
         private void AddService(ServiceHandler sh)
@@ -119,6 +110,7 @@ namespace YoufityWinForms
         private void CbSourceService_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnSelectInputUrl.Enabled = cbSourceService.SelectedIndex != -1;
+            btnBrowseInput.Enabled = btnSelectInputUrl.Enabled;
             for (int i = 0; i < Services.Count; i++)
                 Services[i].Source = i == cbSourceService.SelectedIndex;
         }

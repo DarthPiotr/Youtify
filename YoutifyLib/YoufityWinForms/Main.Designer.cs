@@ -42,10 +42,10 @@
             this.gbStep3 = new System.Windows.Forms.GroupBox();
             this.cbTargetService = new System.Windows.Forms.ComboBox();
             this.btnBrowseOutput = new System.Windows.Forms.Button();
+            this.btnNewOutput = new System.Windows.Forms.Button();
             this.btnSelectOutputUrl = new System.Windows.Forms.Button();
             this.labSelectedIdOutput = new System.Windows.Forms.Label();
             this.labSelectedServiceOutput = new System.Windows.Forms.Label();
-            this.btnNewOutput = new System.Windows.Forms.Button();
             this.gbStep1.SuspendLayout();
             this.gbStep2.SuspendLayout();
             this.gbStep3.SuspendLayout();
@@ -134,7 +134,7 @@
             this.btnBrowseInput.Name = "btnBrowseInput";
             this.btnBrowseInput.Size = new System.Drawing.Size(160, 58);
             this.btnBrowseInput.TabIndex = 5;
-            this.btnBrowseInput.Text = "Browse playlists (unavailable)";
+            this.btnBrowseInput.Text = "Browse playlists";
             this.btnBrowseInput.UseVisualStyleBackColor = true;
             this.btnBrowseInput.Click += new System.EventHandler(this.BtnBrowseInput_Click);
             // 
@@ -203,6 +203,16 @@
             this.btnBrowseOutput.UseVisualStyleBackColor = true;
             this.btnBrowseOutput.Click += new System.EventHandler(this.BtnBrowseInput_Click);
             // 
+            // btnNewOutput
+            // 
+            this.btnNewOutput.Location = new System.Drawing.Point(235, 87);
+            this.btnNewOutput.Name = "btnNewOutput";
+            this.btnNewOutput.Size = new System.Drawing.Size(88, 58);
+            this.btnNewOutput.TabIndex = 4;
+            this.btnNewOutput.Text = "Create new";
+            this.btnNewOutput.UseVisualStyleBackColor = true;
+            this.btnNewOutput.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
+            // 
             // btnSelectOutputUrl
             // 
             this.btnSelectOutputUrl.Location = new System.Drawing.Point(6, 87);
@@ -230,16 +240,6 @@
             this.labSelectedServiceOutput.Size = new System.Drawing.Size(59, 20);
             this.labSelectedServiceOutput.TabIndex = 1;
             this.labSelectedServiceOutput.Text = "Service:";
-            // 
-            // btnNewOutput
-            // 
-            this.btnNewOutput.Location = new System.Drawing.Point(235, 87);
-            this.btnNewOutput.Name = "btnNewOutput";
-            this.btnNewOutput.Size = new System.Drawing.Size(88, 58);
-            this.btnNewOutput.TabIndex = 4;
-            this.btnNewOutput.Text = "Create new";
-            this.btnNewOutput.UseVisualStyleBackColor = true;
-            this.btnNewOutput.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
             // 
             // Main
             // 
