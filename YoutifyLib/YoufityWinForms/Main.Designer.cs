@@ -199,9 +199,9 @@
             this.btnBrowseOutput.Name = "btnBrowseOutput";
             this.btnBrowseOutput.Size = new System.Drawing.Size(129, 58);
             this.btnBrowseOutput.TabIndex = 5;
-            this.btnBrowseOutput.Text = "Browse playlists (unavailable)";
+            this.btnBrowseOutput.Text = "Browse playlists";
             this.btnBrowseOutput.UseVisualStyleBackColor = true;
-            this.btnBrowseOutput.Click += new System.EventHandler(this.BtnBrowseInput_Click);
+            this.btnBrowseOutput.Click += new System.EventHandler(this.BtnBrowseOutput_Click);
             // 
             // btnNewOutput
             // 
@@ -211,7 +211,7 @@
             this.btnNewOutput.TabIndex = 4;
             this.btnNewOutput.Text = "Create new";
             this.btnNewOutput.UseVisualStyleBackColor = true;
-            this.btnNewOutput.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
+            this.btnNewOutput.Click += new System.EventHandler(this.BtnNewOutput_Click);
             // 
             // btnSelectOutputUrl
             // 
@@ -221,7 +221,7 @@
             this.btnSelectOutputUrl.TabIndex = 4;
             this.btnSelectOutputUrl.Text = "Select Url";
             this.btnSelectOutputUrl.UseVisualStyleBackColor = true;
-            this.btnSelectOutputUrl.Click += new System.EventHandler(this.BtnSelectInputUrl_Click);
+            this.btnSelectOutputUrl.Click += new System.EventHandler(this.BtnSelectOutputUrl_Click);
             // 
             // labSelectedIdOutput
             // 

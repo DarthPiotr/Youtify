@@ -44,21 +44,40 @@ namespace YoufityWinForms
             {
                 labSelectedIdOutput.Text = "Selected id: " + value;
                 targetid = value;
+                targetplaylist = null;
             }
         }
-        private string sourceid;
-        private string targetid;
+        /// <summary>
+        /// Target playlist, if checked not to create new
+        /// </summary>
+        private Playlist TargetPlaylist
+        {
+            get => targetplaylist;
+            set
+            {
+                targetplaylist = value;
+                targetid = "";
+                labSelectedIdOutput.Text = "Playlist ready to be created";
+            }
+        }
+
+        private string sourceid = "";
+        private string targetid = "";
+        private Playlist targetplaylist = null;
 
         public Main()
         {
             InitializeComponent();
             Services = new List<ServiceRole>();
             
-            btnSelectInputUrl.Enabled = false;
-            btnBrowseInput.Enabled = false;
+            btnSelectInputUrl .Enabled = false;
+            btnBrowseInput    .Enabled = false;
+
             btnSelectOutputUrl.Enabled = false;
-            btnBrowseOutput.Enabled = false;
-            btnDelService.Enabled = false;
+            btnBrowseOutput   .Enabled = false;
+            btnNewOutput      .Enabled = false;
+
+            btnDelService     .Enabled = false;
         }
 
         /// <summary>
@@ -78,6 +97,46 @@ namespace YoufityWinForms
         {
             for (int i = 0; i < Services.Count; i++)
                 Services[i].Target = i == index;
+        }
+        /// <summary>
+        /// Adding Service, making sure everything is the same
+        /// </summary>
+        /// <param name="service">Service to add</param>
+        private void AddService(ServiceHandler service)
+        {
+            Services.Add(new ServiceRole(service));
+            lbServices.Items.Add(service.Name);
+            cbSourceService.Items.Add(service.Name);
+            cbTargetService.Items.Add(service.Name);
+        }
+        /// <summary>
+        /// Removing Service, making sure everything is the same
+        /// </summary>
+        /// <param name="service">Service to add</param>
+        private void RemoveServiceAt(int index)
+        {
+            var result = MessageBox.Show(
+                "Deleting any service will reset all selected playlists.\nDo you wish to continue?",
+                "Deleting service",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+
+            if (result == DialogResult.No)
+                return;
+
+            Services.RemoveAt(index);
+            lbServices.Items.RemoveAt(index);
+
+            SourceId = "";
+            cbSourceService.Items.RemoveAt(index);
+            cbSourceService.SelectedIndex = -1;
+            cbSourceService.SelectedIndex = -1;
+
+            TargetId = "";
+            cbTargetService.Items.RemoveAt(index);
+            cbTargetService.SelectedIndex = -1;
+            cbTargetService.SelectedIndex = -1;
         }
 
         /////////////////////////////
@@ -127,6 +186,29 @@ namespace YoufityWinForms
             btnDelService.Enabled = lbServices.SelectedIndex != -1;
         }
         /// <summary>
+        /// Selecting input service
+        /// </summary>
+        private void CbSourceService_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnSelectInputUrl.Enabled =
+            btnBrowseInput.Enabled =
+                cbSourceService.SelectedIndex != -1;
+
+            SelectSourceService(cbTargetService.SelectedIndex);
+        }
+        /// <summary>
+        /// Selecting target service
+        /// </summary>
+        private void CbTargetService_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnSelectOutputUrl.Enabled =
+            btnBrowseOutput   .Enabled =
+            btnNewOutput      .Enabled =
+                cbTargetService.SelectedIndex != -1;
+
+            SelectTargetService(cbTargetService.SelectedIndex);
+        }
+        /// <summary>
         /// Selecting input Url
         /// </summary>
         private void BtnSelectInputUrl_Click(object sender, EventArgs e)
@@ -144,69 +226,52 @@ namespace YoufityWinForms
             var browsePlaylists = new BrowsePlaylists(Services[cbSourceService.SelectedIndex].Service);
             browsePlaylists.ShowDialog();
 
-            SourceId = browsePlaylists.SelectedPlaylist.Id;
+            SourceId = browsePlaylists.SelectedPlaylist?.Id ?? "";
         }
         /// <summary>
-        /// Adding Service, making sure everything is the same
+        /// Selecting output Url
         /// </summary>
-        /// <param name="service">Service to add</param>
-        private void AddService(ServiceHandler service)
+        private void BtnSelectOutputUrl_Click(object sender, EventArgs e)
         {
-            Services.Add(new ServiceRole(service));
-            lbServices.Items.Add(service.Name);
-            cbSourceService.Items.Add(service.Name);
-            cbTargetService.Items.Add(service.Name);
+            var selUrl = new SelectUrl(Services[cbTargetService.SelectedIndex].Service);
+            selUrl.ShowDialog();
+
+            TargetId = selUrl.Id ?? "";
         }
         /// <summary>
-        /// Removing Service, making sure everything is the same
+        /// Browsing for output url
         /// </summary>
-        /// <param name="service">Service to add</param>
-        private void RemoveServiceAt(int index)
+        private void BtnBrowseOutput_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show(
-                "Deleting any service will reset all selected playlists.\nDo you wish to continue?",
-                "Deleting service",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);
+            var browsePlaylists = new BrowsePlaylists(Services[cbTargetService.SelectedIndex].Service);
+            browsePlaylists.ShowDialog();
 
-            if (result == DialogResult.No)
-                return;
-            
-            Services.RemoveAt(index);
-            lbServices.Items.RemoveAt(index);
-
-            SourceId = "";
-            cbSourceService.Items.RemoveAt(index);
-            cbSourceService.SelectedIndex = -1;
-            cbSourceService.SelectedIndex = -1;
-
-            TargetId = "";
-            cbTargetService.Items.RemoveAt(index);
-            cbTargetService.SelectedIndex = -1;
-            cbTargetService.SelectedIndex = -1;
+            TargetId = browsePlaylists.SelectedPlaylist.Id ?? "";
         }
         /// <summary>
-        /// Selecting input service
+        /// Creating new playlist for output
         /// </summary>
-        private void CbSourceService_SelectedIndexChanged(object sender, EventArgs e)
+        private void BtnNewOutput_Click(object sender, EventArgs e)
         {
-            btnSelectInputUrl.Enabled =
-            btnBrowseInput.Enabled =
-                cbSourceService.SelectedIndex != -1;
+            var create = new CreateNewPlaylist(Services[cbTargetService.SelectedIndex].Service);
+            create.ShowDialog();
 
-            SelectSourceService(cbTargetService.SelectedIndex);
+            if (create.CreatedPlaylist != null)
+            {
+                if (!string.IsNullOrEmpty(create.CreatedPlaylist.Id))
+                {
+                    TargetId = create.CreatedPlaylist.Id;
+                }
+                else
+                {
+                    TargetPlaylist = create.CreatedPlaylist;
+                }
+            }
+            else
+            {
+                TargetId = "";
+                TargetPlaylist = null;
+            }
         }
-        /// <summary>
-        /// Selecting target service
-        /// </summary>
-        private void CbTargetService_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            btnSelectOutputUrl.Enabled =
-            btnBrowseOutput.Enabled =
-                cbTargetService.SelectedIndex != -1;
-
-            SelectTargetService(cbTargetService.SelectedIndex);
-        }   
     }
 }

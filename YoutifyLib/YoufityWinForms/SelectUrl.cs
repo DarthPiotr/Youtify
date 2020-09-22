@@ -12,7 +12,7 @@ namespace YoufityWinForms
 {
     public partial class SelectUrl : Form
     {
-        ServiceHandler service;
+        readonly ServiceHandler Service;
         public string Id
         {
             get => id;
@@ -27,7 +27,7 @@ namespace YoufityWinForms
         public SelectUrl(ServiceHandler handler)
         {
             InitializeComponent();
-            service = handler;
+            Service = handler;
             Id = string.Empty;
         }
 
@@ -71,7 +71,7 @@ namespace YoufityWinForms
             labId.Text = id;
             Playlist plinfo = null;
 
-            Task task = new Task(() => { plinfo = service.ImportPlaylist(id, true); });
+            Task task = new Task(() => { plinfo = Service.ImportPlaylist(id, true); });
             task.Start();
             await task;
 
@@ -94,12 +94,12 @@ namespace YoufityWinForms
             btnSearch.Enabled = true;
         }
 
-        private void btnSelect_Click(object sender, EventArgs e)
+        private void BtnSelect_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void BtnCancel_Click(object sender, EventArgs e)
         {
             Id = string.Empty;
             Close();
