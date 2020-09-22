@@ -75,7 +75,11 @@ namespace YoutifyLib
         /// <param name="maxResults">Maximum number of results</param>
         /// <returns>List of tracks matching the query</returns>
         public abstract List<Track> SearchForTracks(string query, int maxResults = 5);
-
+        /// <summary>
+        /// Returns list of User's playlists
+        /// </summary>
+        /// <param name="maxResults">Max number of results</param>
+        /// <returns>List of playlists</returns>
         public abstract List<Playlist> SearchForMyPlaylists(int maxResults = 0);
 
         /// <summary>

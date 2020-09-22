@@ -191,7 +191,7 @@
             this.cbTargetService.Name = "cbTargetService";
             this.cbTargetService.Size = new System.Drawing.Size(238, 28);
             this.cbTargetService.TabIndex = 3;
-            this.cbTargetService.SelectedIndexChanged += new System.EventHandler(this.CbSourceService_SelectedIndexChanged);
+            this.cbTargetService.SelectedIndexChanged += new System.EventHandler(this.CbTargetService_SelectedIndexChanged);
             // 
             // btnBrowseOutput
             // 

@@ -16,10 +16,17 @@ namespace YoufityWinForms
     /// /// </summary>
     public partial class BrowsePlaylists : Form
     {
+        /// <summary>
+        /// Service to call for playlists
+        /// </summary>
         private readonly ServiceHandler Service;
-
+        /// <summary>
+        /// Stores list of playlists
+        /// </summary>
         private List<Playlist> Playlists;
-
+        /// <summary>
+        /// Playlist selected by the User
+        /// </summary>
         public Playlist SelectedPlaylist;
 
         public BrowsePlaylists(ServiceHandler service)
@@ -31,7 +38,10 @@ namespace YoufityWinForms
             lbPlaylists.SelectedIndex = -1;
             btnSelect.Enabled = false;
         }
-
+        
+        /// <summary>
+        /// Refresh/Load all user's playlists
+        /// </summary>
         private async void BtnRefresh_Click(object sender, EventArgs e)
         {
             btnSelect.Enabled =
@@ -58,7 +68,9 @@ namespace YoufityWinForms
             btnRefresh.Enabled =
             lbPlaylists.Enabled = true;
         }
-
+        /// <summary>
+        /// Changing selected playlist
+        /// </summary>
         private void LbPlaylists_SelectedIndexChanged(object sender, EventArgs e)
         {
             if(lbPlaylists.SelectedIndex != -1)
@@ -72,13 +84,17 @@ namespace YoufityWinForms
                 btnSelect.Enabled = false;
             }
         }
-
+        /// <summary>
+        /// Selecting playlist
+        /// </summary>
         private void BtnSelect_Click(object sender, EventArgs e)
         {
             SelectedPlaylist = Playlists[lbPlaylists.SelectedIndex];
             this.Close();
         }
-
+        /// <summary>
+        /// Canceling operation
+        /// </summary>
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             SelectedPlaylist = null;

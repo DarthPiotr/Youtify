@@ -12,6 +12,10 @@ using YoutifyLib.YouTube;
 
 namespace YoufityWinForms
 {
+    /// <summary>
+    /// Form for adding new service.
+    /// Available via Service property after closing form.
+    /// </summary>
     public partial class AddService : Form
     {
         internal ServiceHandler Service;
@@ -23,7 +27,9 @@ namespace YoufityWinForms
             lbServices.Items.Add("Spotify");
             Service = null;
         }
-
+        /// <summary>
+        /// Adding selected service
+        /// </summary>
         private async void BtnAdd_Click(object sender, EventArgs e)
         {
             pbAdd.Style = ProgressBarStyle.Marquee;
@@ -44,6 +50,8 @@ namespace YoufityWinForms
                     break;
                 default:
                     MessageBox.Show("Select service first!", "Invalid service", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    lbServices.Enabled = btnAdd.Enabled = true;
+                    pbAdd.Style = ProgressBarStyle.Continuous;
                     return;
             }
 

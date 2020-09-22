@@ -31,7 +31,6 @@ namespace YoutifyLib.YouTube
         /// Setting up YouTube Service with API key and OAuth. Used in constructor.
         /// </summary>
         /// <returns>Task to setup YT Service</returns>
-
         protected override async Task ServiceInitAsync()
         {
             Utils.LogInfo("Initializing service...");
@@ -427,7 +426,6 @@ namespace YoutifyLib.YouTube
 
             return true;
         }
-
         /// <summary>
         /// Returns new empty playlist of the proper service type
         /// </summary>
@@ -444,7 +442,11 @@ namespace YoutifyLib.YouTube
 
             return playlist;
         }
-
+        /// <summary>
+        /// Returns list of User's playlists
+        /// </summary>
+        /// <param name="maxResults">Max number of results</param>
+        /// <returns>List of playlists</returns>
         public override List<Playlist> SearchForMyPlaylists(int maxResults = 0)
         {
             List<Playlist> list = new List<Playlist>();
