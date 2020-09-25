@@ -249,6 +249,7 @@ namespace YoutifyLib.Spotify
         {
 
             var playlist = new SpotifyPlaylist() { Id = playlistId };
+            int items = 0;
             try
             {
                 var req = Service.Playlists.Get(playlistId);
@@ -258,6 +259,8 @@ namespace YoutifyLib.Spotify
                 playlist.Description = req.Result.Description;
                 if (req.Result.Public != null)
                     playlist.Status = (bool)req.Result.Public ? "public" : "private";
+                items += req.Result.Tracks.Items.Count;
+                int total = req.Result.Tracks.Total ?? 0;
 
                 if (onlyMeta)
                     return playlist;
@@ -265,6 +268,26 @@ namespace YoutifyLib.Spotify
                 foreach (var track in req.Result.Tracks.Items)
                 {
                     playlist.Songs.Add(new SpotifyTrack((FullTrack)track.Track));
+                }
+
+                while(items < total)
+                {
+                    var pgir = new PlaylistGetItemsRequest
+                    {
+                        Offset = items
+                    };
+                    var reqItems = Service.Playlists.GetItems(playlistId, pgir);
+                    reqItems.Wait();
+
+                    if(reqItems.Result != null)
+                    {
+                        items += reqItems.Result.Items.Count;
+
+                        foreach (var track in reqItems.Result.Items)
+                        {
+                            playlist.Songs.Add(new SpotifyTrack((FullTrack)track.Track));
+                        }
+                    }
                 }
 
             }

@@ -206,13 +206,15 @@ namespace YoutifyLib.YouTube
         /// <returns>The requested playlist</returns>
         public override Playlist ImportPlaylist(string playlistId, bool onlyMeta = false)
         {
+            // TODO: Refactoring
+
             YouTubePlaylist pl = new YouTubePlaylist { Id = playlistId };
 
             Utils.LogInfo("Requested contents of playlist with Id: {0}", pl.Id);
 
             try
             {
-                var request = Task.Run(() =>
+                var requestInfo = Task.Run(() =>
                 {
                     var req = Service.Playlists.List("snippet, status");
                     req.Id = pl.Id;
@@ -220,38 +222,38 @@ namespace YoutifyLib.YouTube
                     var res = req.ExecuteAsync();
                     return res;
                 });
-                request.Wait();
+                requestInfo.Wait();
 
-                pl.Title = request.Result.Items[0].Snippet.Title;
-                pl.Description = request.Result.Items[0].Snippet.Description;
-                pl.Status = request.Result.Items[0].Status.PrivacyStatus;
+                pl.Title = requestInfo.Result.Items[0].Snippet.Title;
+                pl.Description = requestInfo.Result.Items[0].Snippet.Description;
+                pl.Status = requestInfo.Result.Items[0].Status.PrivacyStatus;
 
                 if (!onlyMeta)
                 {
                     var nextToken = "";
 
-                    var request2 = Task.Run(() =>
-                    {
-                        var req = Service.PlaylistItems.List("snippet");
-                        req.PlaylistId = playlistId;
-                        req.MaxResults = 20;
-                        req.PageToken = nextToken;
-
-                        var res = req.ExecuteAsync();
-                        return res;
-                    });
-
                     while (nextToken != null)
                     {
-                        request.Wait();
-                        Utils.LogInfo("[Playlist] Fetched {0} tracks", request.Result.Items.Count);
+                        var requestTracks = Service.PlaylistItems.List("snippet");
+                        requestTracks.PlaylistId = playlistId;
+                        requestTracks.MaxResults = 20;
+                        requestTracks.PageToken = nextToken;
 
-                        foreach (var item in request2.Result.Items)
+                        var requestTracksTask = Task.Run(() =>
+                            requestTracks.ExecuteAsync()
+                        );
+                        requestTracksTask.Wait();
+                        Utils.LogInfo("[Playlist] Fetched {0} tracks",
+                            requestTracksTask.Result.Items.Count);
+
+                        foreach (var item in requestTracksTask.Result.Items)
                         {
                             pl.Songs.Add(new YouTubeTrack(item));
                             Utils.LogInfo("[Video] {0} added", item.Snippet.Title);
                         }
-                        nextToken = request.Result.NextPageToken;
+
+                        nextToken = requestTracksTask.Result.NextPageToken;
+                        requestTracks.PageToken = nextToken;
                     }
                 }
 
