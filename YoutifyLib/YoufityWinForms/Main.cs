@@ -190,23 +190,27 @@ namespace YoufityWinForms
         /// </summary>
         private void CbSourceService_SelectedIndexChanged(object sender, EventArgs e)
         {
+            ComboBox cb = (ComboBox)sender;
+
             btnSelectInputUrl.Enabled =
             btnBrowseInput.Enabled =
-                cbSourceService.SelectedIndex != -1;
+                cb.SelectedIndex != -1;
 
-            SelectSourceService(cbTargetService.SelectedIndex);
+            SelectSourceService(cb.SelectedIndex);
         }
         /// <summary>
         /// Selecting target service
         /// </summary>
         private void CbTargetService_SelectedIndexChanged(object sender, EventArgs e)
         {
+            ComboBox cb = (ComboBox)sender;
+
             btnSelectOutputUrl.Enabled =
             btnBrowseOutput   .Enabled =
             btnNewOutput      .Enabled =
-                cbTargetService.SelectedIndex != -1;
+                cb.SelectedIndex != -1;
 
-            SelectTargetService(cbTargetService.SelectedIndex);
+            SelectTargetService(cb.SelectedIndex);
         }
         /// <summary>
         /// Selecting input Url
@@ -272,6 +276,35 @@ namespace YoufityWinForms
                 TargetId = "";
                 TargetPlaylist = null;
             }
+        }
+
+        private void BtnNext_Click(object sender, EventArgs e)
+        {
+            ServiceHandler sourceService = null, targetService = null;
+            foreach(var serviceRole in Services)
+            {
+                if (serviceRole.Source)
+                    sourceService = serviceRole.Service;
+                if (serviceRole.Target)
+                    targetService = serviceRole.Service;
+            }
+
+            if(sourceService == null || string.IsNullOrWhiteSpace(SourceId))
+            {
+                MessageBox.Show(
+                    "Please select source playlist first.",
+                    "Insufficient information",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            var selectTracks = new SelectTracks(sourceService, SourceId);
+            selectTracks.ShowDialog();
+
+            MessageBox.Show(string.Format(
+                "{0} Tracks selected", selectTracks.Tracks?.Count.ToString() ?? "None"));
+
         }
     }
 }

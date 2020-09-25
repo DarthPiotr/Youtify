@@ -46,6 +46,7 @@
             this.btnSelectOutputUrl = new System.Windows.Forms.Button();
             this.labSelectedIdOutput = new System.Windows.Forms.Label();
             this.labSelectedServiceOutput = new System.Windows.Forms.Label();
+            this.btnNext = new System.Windows.Forms.Button();
             this.gbStep1.SuspendLayout();
             this.gbStep2.SuspendLayout();
             this.gbStep3.SuspendLayout();
@@ -61,7 +62,7 @@
             this.lbServices.ItemHeight = 20;
             this.lbServices.Location = new System.Drawing.Point(6, 26);
             this.lbServices.Name = "lbServices";
-            this.lbServices.Size = new System.Drawing.Size(242, 303);
+            this.lbServices.Size = new System.Drawing.Size(242, 290);
             this.lbServices.TabIndex = 0;
             this.lbServices.SelectedIndexChanged += new System.EventHandler(this.LbServices_SelectedIndexChanged);
             this.lbServices.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LbServices_KeyDown);
@@ -69,7 +70,7 @@
             // btnAddService
             // 
             this.btnAddService.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddService.Location = new System.Drawing.Point(104, 335);
+            this.btnAddService.Location = new System.Drawing.Point(104, 322);
             this.btnAddService.Name = "btnAddService";
             this.btnAddService.Size = new System.Drawing.Size(144, 39);
             this.btnAddService.TabIndex = 1;
@@ -80,7 +81,7 @@
             // btnDelService
             // 
             this.btnDelService.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDelService.Location = new System.Drawing.Point(6, 335);
+            this.btnDelService.Location = new System.Drawing.Point(6, 322);
             this.btnDelService.Name = "btnDelService";
             this.btnDelService.Size = new System.Drawing.Size(94, 39);
             this.btnDelService.TabIndex = 2;
@@ -97,7 +98,7 @@
             this.gbStep1.Controls.Add(this.btnDelService);
             this.gbStep1.Location = new System.Drawing.Point(12, 12);
             this.gbStep1.Name = "gbStep1";
-            this.gbStep1.Size = new System.Drawing.Size(254, 385);
+            this.gbStep1.Size = new System.Drawing.Size(254, 372);
             this.gbStep1.TabIndex = 0;
             this.gbStep1.TabStop = false;
             this.gbStep1.Text = "Step 1: Add Services";
@@ -113,7 +114,7 @@
             this.gbStep2.Controls.Add(this.labSelectedServiceInput);
             this.gbStep2.Location = new System.Drawing.Point(272, 13);
             this.gbStep2.Name = "gbStep2";
-            this.gbStep2.Size = new System.Drawing.Size(346, 157);
+            this.gbStep2.Size = new System.Drawing.Size(346, 165);
             this.gbStep2.TabIndex = 3;
             this.gbStep2.TabStop = false;
             this.gbStep2.Text = "Step 2: Select source playlist";
@@ -178,7 +179,7 @@
             this.gbStep3.Controls.Add(this.labSelectedServiceOutput);
             this.gbStep3.Location = new System.Drawing.Point(272, 184);
             this.gbStep3.Name = "gbStep3";
-            this.gbStep3.Size = new System.Drawing.Size(346, 157);
+            this.gbStep3.Size = new System.Drawing.Size(346, 167);
             this.gbStep3.TabIndex = 3;
             this.gbStep3.TabStop = false;
             this.gbStep3.Text = "Step 3: Select target playlist";
@@ -241,14 +242,26 @@
             this.labSelectedServiceOutput.TabIndex = 1;
             this.labSelectedServiceOutput.Text = "Service:";
             // 
+            // btnNext
+            // 
+            this.btnNext.Location = new System.Drawing.Point(524, 357);
+            this.btnNext.Name = "btnNext";
+            this.btnNext.Size = new System.Drawing.Size(94, 29);
+            this.btnNext.TabIndex = 4;
+            this.btnNext.Text = "Next >";
+            this.btnNext.UseVisualStyleBackColor = true;
+            this.btnNext.Click += new System.EventHandler(this.BtnNext_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(634, 409);
+            this.ClientSize = new System.Drawing.Size(628, 396);
+            this.Controls.Add(this.btnNext);
             this.Controls.Add(this.gbStep3);
             this.Controls.Add(this.gbStep2);
             this.Controls.Add(this.gbStep1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -281,6 +294,7 @@
         private System.Windows.Forms.Label labSelectedIdOutput;
         private System.Windows.Forms.Label labSelectedServiceOutput;
         private System.Windows.Forms.Button btnNewOutput;
+        private System.Windows.Forms.Button btnNext;
     }
 }
 
